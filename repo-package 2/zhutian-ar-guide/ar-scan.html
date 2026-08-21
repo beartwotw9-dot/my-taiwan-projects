@@ -16,10 +16,10 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC",Arial,sans-serif}
 html,body{height:100%;overflow:hidden;background:#000}
-#scene-container{position:fixed;inset:0}
+#scene-container{position:fixed;inset:0;z-index:1}
 
 /* 頂部狀態列 */
-.topbar{position:fixed;top:0;left:0;right:0;z-index:50;background:linear-gradient(180deg,rgba(15,23,42,.92),rgba(15,23,42,0));padding:14px 16px 30px;color:#fff}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:50;background:linear-gradient(180deg,rgba(15,23,42,.95),rgba(15,23,42,0));padding:14px 16px 20px;color:#fff}
 .topbar h1{font-size:.95rem}
 .topbar .sub{font-size:.66rem;color:#94a3b8;margin-top:2px}
 .status{margin-top:8px;display:flex;align-items:center;gap:6px;font-size:.72rem}
@@ -32,6 +32,12 @@ html,body{height:100%;overflow:hidden;background:#000}
 .progressbar{position:fixed;top:78px;left:16px;right:16px;z-index:50;display:flex;gap:4px}
 .progressbar .seg{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.25)}
 .progressbar .seg.done{background:var(--primary-light)}
+
+/* 快速測試切換晶片 (支援桌面端測試) */
+.test-chips{position:fixed;top:92px;left:16px;right:16px;z-index:50;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:4px 0}
+.test-chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;background:rgba(15,23,42,.8);color:#cbd5e1;border:1px solid rgba(255,255,255,.2);padding:4px 10px;border-radius:14px;font-size:.68rem;cursor:pointer;white-space:nowrap}
+.chip.active{background:var(--wood);color:#fff;border-color:var(--amber)}
 
 /* 底部提示 / 內容卡 */
 .bottom-sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(15,23,42,.94);backdrop-filter:blur(14px);color:#fff;border-radius:22px 22px 0 0;padding:18px 18px 26px;transition:transform .35s ease;transform:translateY(0);max-height:60vh;overflow-y:auto}
@@ -46,58 +52,67 @@ html,body{height:100%;overflow:hidden;background:#000}
 .btn.green{background:var(--primary)}
 .btn:active{transform:scale(.98)}
 
-/* 沒有 targets.mind 時的設定提醒畫面 */
-.setup-notice{position:fixed;inset:0;z-index:100;background:#0f172a;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;gap:12px}
-.setup-notice h2{font-size:1.1rem;color:var(--amber)}
-.setup-notice p{font-size:.82rem;color:#cbd5e1;line-height:1.7;max-width:340px}
-.setup-notice code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:5px;font-size:.78rem}
-.setup-notice a{color:var(--primary-light)}
+/* 手持相機鏡頭對焦畫框與掃描動態雷射條 */
+.scan-target-box{position:fixed;top:42%;left:50%;transform:translate(-50%,-50%);width:220px;height:220px;border:2px dashed rgba(245,158,11,.8);border-radius:20px;z-index:2;pointer-events:none;animation:targetPulse 2s infinite}
+@keyframes targetPulse{50%{border-color:rgba(74,222,128,.9);transform:translate(-50%,-50%) scale(1.03);}}
+.scan-laser-line{position:absolute;top:0;left:10px;right:10px;height:2px;background:linear-gradient(90deg,transparent,#4ade80,transparent);box-shadow:0 0 10px #4ade80;animation:scanLaser 2.2s ease-in-out infinite}
+@keyframes scanLaser{0%{top:10px;} 50%{top:200px;} 100%{top:10px;}}
 </style>
 </head>
 <body>
 
-<!-- 找不到 targets.mind 時顯示的設定提醒（見下方 checkTargetsFile） -->
-<div class="setup-notice" id="setupNotice" style="display:none">
-  <h2>⚠️ 還沒有掃描目標檔案</h2>
-  <p>
-    這個頁面需要一個 <code>targets.mind</code> 檔案，才知道要辨識哪些測試圖片。<br><br>
-    請先用官方免費工具，把你要拿來測試的 1～8 張照片編譯成 <code>targets.mind</code>：<br>
-    <a href="https://hiukim.github.io/mind-ar-js-doc/tools/compile/" target="_blank" rel="noopener">
-      hiukim.github.io/mind-ar-js-doc/tools/compile
-    </a><br><br>
-    編譯完下載 <code>targets.mind</code> 後，放到跟這個 <code>ar-scan.html</code>
-    「同一個資料夾」，重新整理這一頁就會自動生效。
-  </p>
-  <p style="font-size:.72rem;color:#94a3b8">
-    （測試建議：把 8 張圖片依序印出來或顯示在另一台螢幕上，
-    對應「站 1 ～ 站 8」，用手機瀏覽器打開這頁掃描它們。）
-  </p>
+<div class="topbar">
+  <h1>🚂 竹田頓物驛站｜真實掃描 AR（1～8 站）</h1>
+  <div class="sub">將鏡頭對準已編譯的 8 張測試照片，自動觸發感官任務內容</div>
+  <div class="status scanning" id="statusLine">
+    <span class="dot"></span><span id="statusText">正在掃描中…請將鏡頭對準測試圖</span>
+  </div>
 </div>
 
-<div id="app" style="display:none">
-  <div class="topbar">
-    <h1>🚂 竹田頓物驛站｜真實掃描 AR（測試版）</h1>
-    <div class="sub">用相機對準已編譯的測試圖片，會自動觸發對應任務內容</div>
-    <div class="status scanning" id="statusLine">
-      <span class="dot"></span><span id="statusText">掃描中…尚未偵測到目標</span>
-    </div>
-  </div>
+<div class="progressbar" id="progressBar"></div>
 
-  <div class="progressbar" id="progressBar"></div>
+<div class="test-chips">
+  <div class="chip" onclick="simulateTarget(0)">👁️ 站 1 舊站</div>
+  <div class="chip" onclick="simulateTarget(1)">👂 站 2 倉庫</div>
+  <div class="chip" onclick="simulateTarget(2)">✋ 站 3 古井</div>
+  <div class="chip" onclick="simulateTarget(3)">🌾 站 4 米倉</div>
+  <div class="chip" onclick="simulateTarget(4)">👃 站 5 花園</div>
+  <div class="chip" onclick="simulateTarget(5)">📸 站 6 攝影館</div>
+  <div class="chip" onclick="simulateTarget(6)">🚂 站 7 月台</div>
+  <div class="chip" onclick="simulateTarget(7)">⚙️ 站 8 米廠</div>
+</div>
 
-  <div id="scene-container"></div>
+<!-- 掃描對焦畫框 -->
+<div class="scan-target-box">
+  <div class="scan-laser-line"></div>
+</div>
 
-  <div class="bottom-sheet hint-only" id="bottomSheet">
-    <div class="hint-text" id="hintText">
-      請將鏡頭對準測試圖片 1～8 其中一張，畫面會自動辨識並顯示任務內容。
-    </div>
+<!-- A-Frame Scene (MindAR Engine) -->
+<div id="scene-container">
+  <a-scene mindar-image="imageTargetSrc: targets.mind; autoStart: true; uiScanning: no; uiLoading: no;"
+    color-space="sRGB" renderer="colorManagement: true" vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false" embedded style="width:100%;height:100%">
+    <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;"></a-camera>
+    
+    <a-entity id="target-0" mindar-image-target="targetIndex: 0"><a-plane color="#4ade80" opacity="0.2" position="0 0 0" height="1" width="1"></a-plane></a-entity>
+    <a-entity id="target-1" mindar-image-target="targetIndex: 1"><a-plane color="#4ade80" opacity="0.2" position="0 0 0" height="1" width="1"></a-plane></a-entity>
+    <a-entity id="target-2" mindar-image-target="targetIndex: 2"><a-plane color="#4ade80" opacity="0.2" position="0 0 0" height="1" width="1"></a-plane></a-entity>
+    <a-entity id="target-3" mindar-image-target="targetIndex: 3"><a-plane color="#4ade80" opacity="0.2" position="0 0 0" height="1" width="1"></a-plane></a-entity>
+    <a-entity id="target-4" mindar-image-target="targetIndex: 4"><a-plane color="#4ade80" opacity="0.2" position="0 0 0" height="1" width="1"></a-plane></a-entity>
+    <a-entity id="target-5" mindar-image-target="targetIndex: 5"><a-plane color="#4ade80" opacity="0.2" position="0 0 0" height="1" width="1"></a-plane></a-entity>
+    <a-entity id="target-6" mindar-image-target="targetIndex: 6"><a-plane color="#4ade80" opacity="0.2" position="0 0 0" height="1" width="1"></a-plane></a-entity>
+    <a-entity id="target-7" mindar-image-target="targetIndex: 7"><a-plane color="#4ade80" opacity="0.2" position="0 0 0" height="1" width="1"></a-plane></a-entity>
+  </a-scene>
+</div>
+
+<div class="bottom-sheet hint-only" id="bottomSheet">
+  <div class="hint-text" id="hintText">
+    請將手機鏡頭對準【站 1 ~ 站 8】測試照片，會自動偵測觸發任務。<br>
+    （若於電腦開網頁，亦可點擊上方按鈕模擬測試）
   </div>
 </div>
 
 <script>
-/* ======================================
-   沿用主 App 的 8 站任務資料（arData）
-   ====================================== */
 const arData = {
   1:{sense:"視覺",label:"木造舊站",task:"解鎖昔日車票圖騰與日式木造結構細節"},
   2:{sense:"聽覺",label:"紅磚倉庫",task:"聆聽火車過站汽笛聲與池上一郎文庫黑膠音樂"},
@@ -129,15 +144,18 @@ function showFound(stationIndex){
   foundStations.add(n);
   renderProgressBar();
 
+  // 震動回饋 (若裝置支援)
+  if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+
   document.getElementById("statusLine").className = "status found";
-  document.getElementById("statusText").textContent = `✅ 已辨識：${data.label}`;
+  document.getElementById("statusText").textContent = `✅ 已成功辨識：${data.label}`;
 
   const sheet = document.getElementById("bottomSheet");
   sheet.classList.remove("hint-only");
   sheet.innerHTML = `
     <div class="found-card">
       <span class="tag">${data.sense}任務</span>
-      <h3>📍 ${data.label}</h3>
+      <h3>📍 站 ${n}：${data.label}</h3>
       <p>${data.task}</p>
       <button class="btn green" onclick="dismissFound()">✓ 記錄本次掃描，繼續尋找下一站</button>
     </div>
@@ -146,7 +164,7 @@ function showFound(stationIndex){
 
 function showLost(){
   document.getElementById("statusLine").className = "status scanning";
-  document.getElementById("statusText").textContent = "掃描中…尚未偵測到目標";
+  document.getElementById("statusText").textContent = "正在掃描中…請將鏡頭對準測試圖";
 }
 
 function dismissFound(){
@@ -155,50 +173,29 @@ function dismissFound(){
   sheet.innerHTML = `<div class="hint-text">請將鏡頭對準測試圖片 1～8 其中一張，畫面會自動辨識並顯示任務內容。<br><b>${foundStations.size} / 8</b> 站已記錄</div>`;
 }
 
-/* ======================================
-   檢查 targets.mind 是否存在；沒有的話顯示設定提醒，
-   而不是讓相機在沒有目標的情況下空轉。
-   ====================================== */
-async function checkTargetsFile(){
-  try{
-    const res = await fetch("targets.mind", { method: "HEAD" });
-    if (!res.ok) throw new Error("not found");
-    initScene();
-  }catch(e){
-    document.getElementById("setupNotice").style.display = "flex";
-  }
+function simulateTarget(idx) {
+  showFound(idx);
 }
 
-function initScene(){
-  document.getElementById("app").style.display = "block";
+document.addEventListener("DOMContentLoaded", () => {
   renderProgressBar();
 
-  const container = document.getElementById("scene-container");
-  container.innerHTML = `
-    <a-scene mindar-image="imageTargetSrc: targets.mind; autoStart: true; uiScanning: no; uiLoading: no;"
-      color-space="sRGB" renderer="colorManagement: true" vr-mode-ui="enabled: false"
-      device-orientation-permission-ui="enabled: false" embedded style="width:100%;height:100%">
-      <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;"></a-camera>
-      ${[0,1,2,3,4,5,6,7].map(i => `
-        <a-entity id="target-${i}" mindar-image-target="targetIndex: ${i}">
-          <a-plane color="#4ade80" opacity="0.15" position="0 0 0" height="1" width="1" rotation="0 0 0"></a-plane>
-        </a-entity>
-      `).join("")}
-    </a-scene>
-  `;
+  // 掛載 MindAR 事件監聽
+  const sceneEl = document.querySelector("a-scene");
+  if (sceneEl) {
+    sceneEl.addEventListener("renderstart", () => {
+      console.log("MindAR Scene ready!");
+    });
+  }
 
-  // 等 a-scene 建好後，掛上每個目標的 found/lost 事件
-  setTimeout(() => {
-    for (let i = 0; i < 8; i++){
-      const el = document.getElementById(`target-${i}`);
-      if (!el) continue;
+  for (let i = 0; i < 8; i++){
+    const el = document.getElementById(`target-${i}`);
+    if (el) {
       el.addEventListener("targetFound", () => showFound(i));
       el.addEventListener("targetLost", () => showLost());
     }
-  }, 300);
-}
-
-checkTargetsFile();
+  }
+});
 </script>
 </body>
 </html>
