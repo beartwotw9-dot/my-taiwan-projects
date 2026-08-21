@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>崁頂時空圖鑑：風吹過的誓言</title>
+<!-- 導入 Google 復古襯線字型 -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* ── 統一色彩與全局變數設定 ── */
+:root {
+  --bg-main: #f4f0ea;           /* 懷舊紙張主底色 */
+  --card-bg: #fdfbf7;           /* 標準卡片暖白底 */
+  --card-dark-bg: #1c1613;      /* 角色互動卡片底色（深木漆質感） */
+  --paper-dark: #261f1a;        /* 卡片背面底色 */
+  --text-main: #2b2523;         /* 深木炭主文字 */
+  --text-muted: #6e635b;        /* 灰褐次要文字 */
+  --text-light: #ece3d5;        /* 深色卡片專用淺文字 */
+  --accent-gold: #b8860b;       /* 懷舊黃銅金 */
+  --accent-gold-hover: #d4af37; /* 黃金亮色 */
+  --line-a: #8b261d;            /* A線：紅磚深紅 */
+  --line-b: #2e5b88;            /* B線：海軍藍 */
+  --line-all: #5c554e;          /* 全線路中性灰 */
+  --border-color: #dcd4c8;      /* 輕微邊框線 */
+  --border-dark: #4a3c31;       /* 深色卡片邊框 */
+  --shadow-sm: 0 2px 8px rgba(43,38,35,0.06);
+  --shadow-lg: 0 8px 20px rgba(43,38,35,0.12);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Noto Serif TC', "PingFang TC", "Heiti TC", "Microsoft JhengHei", serif, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1150px;
+  margin: 0 auto;
+  padding: 30px 16px 60px;
+}
+
+/* ── 頁頭標題區 ── */
+header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+h1 {
+  font-size: 32px;
+  margin-bottom: 8px;
+  color: var(--line-a);
+  letter-spacing: 1px;
+}
+
+h2 {
+  font-size: 22px;
+  margin: 10px 0 16px;
+  color: var(--line-a);
+  border-bottom: 2px solid var(--accent-gold);
+  padding-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+h3 {
+  font-size: 18px;
+  margin: 12px 0 8px;
+  color: var(--text-main);
+}
+
+p {
+  margin: 8px 0;
+}
+
+.muted {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* ── 通用卡片容器 ── */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+/* ── 標籤樣式 ── */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+  margin-right: 6px;
+}
+.badge-a { background: var(--line-a); }
+.badge-b { background: var(--line-b); }
+.badge-all { background: var(--line-all); }
+
+/* ── 藝廊畫廊區 ── */
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+.image-card {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.image-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  display: block;
+}
+.image-caption {
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* 圖片載入失敗時的優雅降級：隱藏壞圖示，改顯示提示區塊 */
+.image-card.img-missing img {
+  display: none;
+}
+.image-card.img-missing::before {
+  content: "🖼️ 圖片尚未上傳";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+  background: #f1ede3;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* ── 角色互動圖鑑區塊 ── */
+.section-header {
+  text-align: center;
+  margin: 10px 0 24px;
+}
+.filter-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.filter-btn {
+  background: transparent;
+  border: 1px solid var(--accent-gold);
+  color: var(--text-main);
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.25s ease;
+}
+.filter-btn:hover, .filter-btn.active {
+  background-color: var(--accent-gold);
+  color: #fff;
+  font-weight: bold;
+}
+
+.character-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 20px;
+}
+
+.card-container {
+  background-color: transparent;
+  height: 480px;
+  perspective: 1000px;
+}
+@media (max-width: 400px) {
+  .card-container {
+    height: 540px;
+  }
+}
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-style: preserve-3d;
+  cursor: pointer;
+  border-radius: 8px;
+  border: 1px solid var(--border-dark);
+  box-shadow: var(--shadow-lg);
+}
+.card-container.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front, .card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 8px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* 角色卡正面 */
+.card-front {
+  background-color: var(--card-dark-bg);
+  color: var(--text-light);
+}
+.avatar-placeholder {
+  width: 100%;
+  height: 200px;
+  border: 1px dashed var(--border-dark);
+  border-radius: 4px;
+  background-color: #120e0c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 10px;
+  margin-top: 8px;
+}
+.avatar-photo {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-top: 8px;
+  display: block;
+  border: 1px solid var(--border-dark);
+}
+.character-title-group {
+  margin-top: 12px;
+}
+.character-name {
+  font-size: 1.3rem;
+  color: var(--accent-gold-hover);
+}
+.character-age {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.character-identity {
+  font-size: 0.88rem;
+  color: var(--text-light);
+  margin-top: 4px;
+}
+.flip-hint {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--accent-gold);
+  border-top: 1px dashed var(--border-dark);
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+/* 角色卡背面 */
+.card-back {
+  background-color: var(--paper-dark);
+  color: var(--text-light);
+  transform: rotateY(180deg);
+  border: 1px solid var(--accent-gold);
+}
+.motto-box {
+  font-style: italic;
+  color: var(--accent-gold-hover);
+  font-size: 0.9rem;
+  border-left: 3px solid var(--accent-gold);
+  padding-left: 8px;
+  margin-bottom: 10px;
+}
+.audio-btn {
+  background: rgba(184, 134, 11, 0.15);
+  border: 1px solid var(--accent-gold);
+  color: var(--accent-gold-hover);
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+}
+.audio-btn:hover {
+  background: var(--accent-gold);
+  color: var(--card-dark-bg);
+}
+.info-group {
+  font-size: 0.83rem;
+  margin-top: 6px;
+}
+.info-group strong {
+  color: var(--accent-gold-hover);
+}
+.tag-clue {
+  background: rgba(139, 38, 29, 0.4);
+  border: 1px solid var(--line-a);
+  color: #ffa49c;
+  padding: 3px 6px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-bottom: 4px;
+  font-size: 0.78rem;
+}
+.tag-emotion {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  display: block;
+  margin-bottom: 6px;
+}
+.items-list {
+  background: rgba(0,0,0,0.3);
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-dark);
+}
+
+/* ── 流程時間軸 ── */
+.timeline {
+  position: relative;
+  padding-left: 20px;
+  border-left: 3px solid var(--accent-gold);
+  margin: 16px 0;
+}
+.timeline-item {
+  margin-bottom: 18px;
+}
+.timeline-title {
+  font-weight: bold;
+  font-size: 1.05rem;
+  color: var(--line-a);
+  margin-bottom: 4px;
+}
+
+/* ── 美食資訊網格 ── */
+.food-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+.food-card {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 14px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.food-name {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--line-a);
+  margin-bottom: 2px;
+}
+.food-village {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.food-card p {
+  font-size: 0.88rem;
+  color: var(--text-main);
+}
+.food-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.food-tag {
+  font-size: 0.75rem;
+  background: var(--bg-main);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.footer {
+  margin-top: 40px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>崁頂時空圖鑑：風吹過的誓言</h1>
+  <p class="muted">12人戶外沉浸實境劇本企劃（崁頂核心園區版）｜版本 v1.0｜更新日期 2026-08-12</p>
+</header>
+
+<!-- 場景介紹區 -->
+<section class="card">
+  <h2>📷 拍攝場景介紹</h2>
+  <p class="muted">說明：決定劇情走向的分布地點</p>
+  <div class="image-gallery">
+    <div class="image-card">
+      <img src="圖片1.jpg" alt="崁頂生態公園或主視覺" onerror="this.closest('.image-card').classList.add('img-missing')">
+      <div class="image-caption">圖 1：崁頂生態公園／主視覺</div>
+    </div>
+    <div class="image-card">
+      <img src="圖片2.jpg" alt="古厝老宅區場景" onerror="this.closest('.image-card').classList.add('img-missing')">
+      <div class="image-caption">圖 2：古厝老宅區</div>
+    </div>
+    <div class="image-card">
+      <img src="圖片3.JPG" alt="糖鐵遺址與碉堡體驗區" onerror="this.closest('.image-card').classList.add('img-missing')">
+      <div class="image-caption">圖 3：糖鐵遺址與碉堡體驗區</div>
+    </div>
+    <div class="image-card">
+      <img src="圖片4.jpg" alt="農產甜點體驗區" onerror="this.closest('.image-card').classList.add('img-missing')">
+      <div class="image-caption">圖 4：農產甜點體驗區</div>
+    </div>
+    <div class="image-card">
+      <img src="圖片5.jpg" alt="藝術的殿堂" onerror="this.closest('.image-card').classList.add('img-missing')">
+      <div class="image-caption">圖 5：藝術的殿堂</div>
+    </div>
+    <div class="image-card">
+      <img src="圖片6.jpg" alt="奶奶的血脈" onerror="this.closest('.image-card').classList.add('img-missing')">
+      <div class="image-caption">圖 6：奶奶的血脈</div>
+    </div>
+  </div>
+</section>
+
+<!-- 故事背景 -->
+<section class="card">
+  <h2>📖 故事背景與在地真實歷史融合</h2>
+  <p><strong>背景設定：</strong>1944 年，日治末期戰雲密布的崁頂。美軍空襲頻繁，東港溪畔戰雲密佈。港東村日軍機槍碉堡附近傳出消息，日軍正準備將原本屬於地方的「糖鐵黃金與歷史文獻」秘密運走。</p>
+  <ul style="margin-left: 20px; margin-top: 8px;">
+    <li><strong>戰爭與搶救寶藏（友情主線）：</strong>糖鐵員工、戰地郵差與水利技師組成「保寶同盟」，誓死搶救被封鎖在碉堡與糖鐵車廂裡的土地資產與黃金。</li>
+    <li><strong>禁忌之戀（情感主線）：</strong>圍內古厝的撕裂合照背後，藏著陳鄉長一段無法公開的愛情。</li>
+    <li><strong>懸疑民俗與血脈（親情與懸疑線）：</strong>力社村平埔族公廨傳來老阿嬤低沉吟唱的古老咒詞，交織出帶著台南奇案風格的懸疑氛圍。</li>
+  </ul>
+</section>
+
+<!-- 雙主線總覽 -->
+<section class="card">
+  <h2>🧭 雙主線架構總覽</h2>
+  <p><strong>格式：</strong>雙主線平行推演（A線：血脈/信仰/禁忌之戀；B線：戰爭/寶藏/戰地友情）</p>
+  <p style="margin-bottom: 14px;"><strong>玩家數：</strong>12 人｜<strong>預估時長：</strong>3.5 小時</p>
+  <div class="grid">
+    <div class="card" style="margin:0; background: #fff;">
+      <h3>線路 A：血脈、信仰與禁忌之戀</h3>
+      <p><span class="badge badge-a">A 線</span>主軸：親情, 愛情, 民俗懸疑</p>
+      <p style="margin-top: 8px;"><strong>站點：</strong></p>
+      <ul style="margin-left: 20px;">
+        <li>圍內古厝（撕裂合照與鄉長的愛）</li>
+        <li>力社公廨體驗區（老阿嬤咒詞與血脈）</li>
+        <li>麻油與甜點關卡（嗅覺與甜蜜暗號）</li>
+      </ul>
+    </div>
+    <div class="card" style="margin:0; background: #fff;">
+      <h3>線路 B：戰爭、寶藏與戰地友情</h3>
+      <p><span class="badge badge-b">B 線</span>主軸：友情, 戰爭, 搶救寶藏</p>
+      <p style="margin-top: 8px;"><strong>站點：</strong></p>
+      <ul style="margin-left: 20px;">
+        <li>糖鐵遺址（汽笛聲與黃金運送圖）</li>
+        <li>日軍機槍碉堡體驗區（軍事密碼）</li>
+        <li>農場採集區（搶救戰時糧食與資產）</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 12大角色圖鑑 -->
+<section class="card">
+  <div class="section-header">
+    <h2>🎴 12 大角色互動圖鑑</h2>
+    <p class="muted">點擊卡片可進行翻牌，解鎖人物格言、關鍵線索與 5 秒聲音檔案</p>
+  </div>
+
+  <!-- 篩選頁籤 -->
+  <div class="filter-container">
+    <button class="filter-btn active" id="filterBtnAll" onclick="filterLine(event, 'all')">全部角色</button>
+    <button class="filter-btn" id="filterBtnA" onclick="filterLine(event, 'line-a')">線路 A：血脈、信仰與禁忌之戀</button>
+    <button class="filter-btn" id="filterBtnB" onclick="filterLine(event, 'line-b')">線路 B：戰爭、寶藏與戰地友情</button>
+  </div>
+
+  <!-- 卡片網格區 -->
+  <div class="character-grid" id="characterGrid">
+
+    <!-- 1. 陳紹安 -->
+    <div class="card-container line-a" onclick="toggleFlip(this)">
+      <div class="card-inner">
+        <div class="card-front">
+          <div>
+            <span class="badge badge-a">線路 A</span>
+            <img class="avatar-photo" src="characters/char-01-chen-shao-an.jpg" alt="陳紹安">
+            <div class="character-title-group">
+              <div class="character-name">陳紹安 <span class="character-age">(約26歲)</span></div>
+              <div class="character-identity">陳鄉長直系後代 / 留洋知識青年</div>
+            </div>
+          </div>
+          <div class="flip-hint">↺ 點擊卡片翻面查看線索與音訊</div>
+        </div>
+        <div class="card-back">
+          <div>
+            <div class="motto-box">「若照片能被撕裂，那這片土地埋藏的愛，是否也能被抹去？」</div>
+            <button class="audio-btn" onclick="playAudio(event, '（紙張摩擦聲）這張合照背後的手跡……父親，你當年究竟瞞著我們，愛上了誰？')">
+              🔊 播放 5秒語音台詞
+            </button>
+          </div>
+          <div class="info-group">
+            <div class="tag-clue">🔍 線索：半張撕裂合照、老宅木盒密碼</div>
+            <div class="tag-emotion">❤️ 情感側重：親情身世 × 禁忌之戀 × 家族解密</div>
+            <p><strong>人物背景：</strong>在圍內老宅翻出一張被撕裂的家族合照，照片中父親身旁被剪去了一半，誓要查出背後真相。</p>
+          </div>
+          <div class="info-group items-list">
+            <strong>隨身道具：</strong>半張撕裂的老照片、黃銅古董鑰匙
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 林婉吟 -->
+    <div class="card-container line-a" onclick="toggleFlip(this)">
+      <div class="card-inner">
+        <div class="card-front">
+          <div>
+            <span class="badge badge-a">線路 A</span>
+            <img class="avatar-photo" src="characters/char-02-lin-wan-yin.jpg" alt="林婉吟">
+            <div class="character-title-group">
+              <div class="character-name">林婉吟 <span class="character-age">(約24歲)</span></div>
+              <div class="character-identity">鄉長昔日心上人的後代</div>
+            </div>
+          </div>
+          <div class="flip-hint">↺ 點擊卡片翻面查看線索與音訊</div>
+        </div>
+        <div class="card-back">
+          <div>
+            <div class="motto-box">「手帕上的蓮藕茶香依舊，但有些人，一轉身就是一輩子。」</div>
+            <button class="audio-btn" onclick="playAudio(event, '（微風聲）祖母留下的手帕上，繡著好桔包子的樣子……這封信，我一定要交給陳家的人。')">
+              🔊 播放 5秒語音台詞
+            </button>
+          </div>
+          <div class="info-group">
+            <div class="tag-clue">🔍 線索：刺繡包子圖樣手帕、未寄出情書</div>
+            <div class="tag-emotion">❤️ 情感側重：愛情沉浸 × 歷史宿命 × 文物線索</div>
+            <p><strong>人物背景：</strong>帶著祖母留下的手帕與信件來到崁頂，手帕上的圖樣是那段愛而不得的唯一見證。</p>
+          </div>
+          <div class="info-group items-list">
+            <strong>隨身道具：</strong>刺繡手帕、未寄出的封印情書
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 潘雨晴 -->
+    <div class="card-container line-a" onclick="toggleFlip(this)">
+      <div class="card-inner">
+        <div class="card-front">
+          <div>
+            <span class="badge badge-a">線路 A</span>
+            <img class="avatar-photo" src="characters/char-03-pan-yu-qing.jpg" alt="潘雨晴">
+            <div class="character-title-group">
+              <div class="character-name">潘雨晴 <span class="character-age">(約22歲)</span></div>
+              <div class="character-identity">馬卡道族公廨傳承人</div>
+            </div>
+          </div>
+          <div class="flip-hint">↺ 點擊卡片翻面查看線索與音訊</div>
+        </div>
+        <div class="card-back">
+          <div>
+            <div class="motto-box">「阿姆祖的吟唱穿過幾百年，祖靈的血脈從未在我們身上斷絕。」</div>
+            <button class="audio-btn" onclick="playAudio(event, '（低沉吟唱音效）聽！阿嬤在風中吟唱的咒詞……這座古厝下面，流著我們族人的血！')">
+              🔊 播放 5秒語音台詞
+            </button>
+          </div>
+          <div class="info-group">
+            <div class="tag-clue">🔍 線索：阿嬤古老吟唱咒詞、祭祀陶罐圖騰</div>
+            <div class="tag-emotion">❤️ 情感側重：親情血脈 × 平埔文化 × 民俗懸疑</div>
+            <p><strong>人物背景：</strong>聽著老阿嬤吟唱的咒詞長大，發現自己的家族血脈與豪門古厝有著不可告人的血緣牽絆。</p>
+          </div>
+          <div class="info-group items-list">
+            <strong>隨身道具：</strong>麻布刺繡符袋、阿姆祖祭祀陶罐
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 許明輝 -->
+    <div class="card-container line-a" onclick="toggleFlip(this)">
+      <div class="card-inner">
+        <div class="card-front">
+          <div>
+            <span class="badge badge-a">線路 A</span>
+            <img class="avatar-photo" src="characters/char-04-xu-ming-hui.jpg" alt="許明輝">
+            <div class="character-title-group">
+              <div class="character-name">許明輝 <span class="character-age">(約32歲)</span></div>
+              <div class="character-identity">精通民俗風水的廟公</div>
+            </div>
+          </div>
+          <div class="flip-hint">↺ 點擊卡片翻面查看線索與音訊</div>
+        </div>
+        <div class="card-back">
+          <div>
+            <div class="motto-box">「神桌下的暗號不說謊，天地巡查，因果自有定數。」</div>
+            <button class="audio-btn" onclick="playAudio(event, '（籤筒搖晃聲）透光看這張硃砂符！神明給的籤詩裡……藏著被替換的孩子真正的名字！')">
+              🔊 播放 5秒語音台詞
+            </button>
+          </div>
+          <div class="info-group">
+            <div class="tag-clue">🔍 線索：神桌下透光硃砂符咒、廟宇奇案籤詩</div>
+            <div class="tag-emotion">❤️ 情感側重：懸疑推理 × 奇案風水 × 符咒破譯</div>
+            <p><strong>人物背景：</strong>發現廟裡神桌下帶有奇案風格的隱密符咒，似乎用來封印關於「被替換的孩子」的秘密。</p>
+          </div>
+          <div class="info-group items-list">
+            <strong>隨身道具：</strong>透光硃砂符咒紙、籤詩解盤
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. 張福伯 -->
+    <div class="card-container line-a" onclick="toggleFlip(this)">
+      <div class="card-inner">
+        <div class="card-front">
+          <div>
+            <span class="badge badge-a">線路 A</span>
+            <img class="avatar-photo" src="characters/char-05-zhang-fu-bo.jpg" alt="張福伯">
+            <div class="character-title-group">
+              <div class="character-name">張福伯 <span class="character-age">(約45歲)</span></div>
+              <div class="character-identity">見證兩代恩怨的忠誠僕人</div>
+            </div>
+          </div>
+          <div class="flip-hint">↺ 點擊卡片翻面查看線索與音訊</div>
+        </div>
+        <div class="card-back">
+          <div>
+            <div class="motto-box">「最香的麻油味，能掩蓋最苦的秘密，也能指引回家的人。」</div>
+            <button class="audio-btn" onclick="playAudio(event, '（倒油聲）少爺，老奴等了你二十年……這榨油坊下面的暗道，只有這瓶油的香味能打開。')">
+              🔊 播放 5秒語音台詞
+            </button>
+          </div>
+          <div class="info-group">
+            <div class="tag-clue">🔍 線索：古法麻油嗅覺瓶、老宅地下暗道圖</div>
+            <div class="tag-emotion">❤️ 情感側重：主僕忠誠 × 機關解密 × 嗅覺體驗</div>
+            <p><strong>人物背景：</strong>熟知鄉長與其心上人相愛的過程，忠心耿耿，用香濃麻油味掩蓋了老宅暗道入口。</p>
+          </div>
+          <div class="info-group items-list">
+            <strong>隨身道具：</strong>麻油嗅覺密碼瓶、古厝暗道圖
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. 葉心怡 -->
+    <div class="card-container line-a" onclick="toggleFlip(this)">
+      <div class="card-inner">
+        <div class="card-front">
+          <div>
+            <span class="badge badge-a">線路 A</span>
+            <img class="avatar-photo" src="characters/char-06-ye-xin-yi.jpg" alt="葉心怡">
+            <div class="character-title-group">
+              <div class="character-name">葉心怡 <span class="character-age">(約25歲)</span></div>
+              <div class="character-identity">洲子甜點農莊主人</div>
+            </div>
+          </div>
+          <div class="flip-hint">↺ 點擊卡片翻面查看線索與音訊</div>
+        </div>
+        <div class="card-back">
+          <div>
+            <div class="motto-box">「無花果入口微酸後甜，就像當年他們私會時，留下的微甜暗號。」</div>
+            <button class="audio-btn" onclick="playAudio(event, '（餐具碰撞聲）這座農園的無花果派，擺放的形狀不是為了美觀……而是一個座標！')">
+              🔊 播放 5秒語音台詞
+            </button>
+          </div>
+          <div class="info-group">
+            <div class="tag-clue">🔍 線索：無花果甜點陣列座標、私會食譜</div>
+            <div class="tag-emotion">❤️ 情感側重：愛情浪漫 × 風土美食 × 陣列解謎</div>
+            <p><strong>人物背景：</strong>製作出的無花果甜點帶著微酸微甜的滋味，甜點的排列方式藏著當年私會暗號。</p>
+          </div>
+          <div class="info-group items-list">
+            <strong>隨身道具：</strong>無花果食譜手冊、甜點暗號盤
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. 李志豪 -->
+    <div class="card-container line-b" onclick="toggleFlip(this)">
+      <div class="card-inner">
+        <div class="card-front">
+          <div>
+            <span class="badge badge-b">線路 B</span>
+            <img class="avatar-photo" src="characters/char-07-li-zhi-hao.jpg" alt="李志豪">
+            <div class="character-title-group">
+              <div class="character-name">李志豪 <span class="character-age">(約28歲)</span></div>
+              <div class="character-identity">掌控糖鐵運輸的關鍵人物</div>
+            </div>
+          </div>
+          <div class="flip-hint">↺ 點擊卡片翻面查看線索與音訊</div>
+        </div>
+        <div class="card-back">
+          <div>
+            <div class="motto-box">「汽笛響起那一刻，我沒有後退，因為我身後是我要保護的兄弟與土地！」</div>
+            <button class="audio-btn" onclick="playAudio(event, '（火車汽笛聲）火車要開了！日軍想把屬於我們的寶藏運走？門都沒有，拉下鐵軌閘門！')">
+              🔊 播放 5秒語音台詞
+            </button>
+          </div>
+          <div class="info-group">
+            <div class="tag-clue">🔍 線索：黃銅火車汽笛聲響、糖鐵列車時刻表</div>
+            <div class="tag-emotion">❤️ 情感側重：生死友情 × 陣營抗爭 × 鐵道搶寶</div>
+            <p><strong>人物背景：</strong>聽到汽笛聲響起知道日軍即將運走寶藏，與夥伴結為生死兄弟，誓死攔截列車。</p>
+          </div>
+          <div class="info-group items-list">
+            <strong>隨身道具：</strong>糖鐵火車汽笛、列車運行時刻表
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. 周國平 -->
+    <div class="card-container line-b" onclick="toggleFlip(this)">
+      <div class="card-inner">
+        <div class="card-front">
+          <div>
+            <span class="badge badge-b">線路 B</span>
+            <img class="avatar-photo" src="characters/char-08-zhou-guo-ping.jpg" alt="周國平">
+            <div class="character-title-group">
+              <div class="character-name">周國平 <span class="character-age">(約27歲)</span></div>
+              <div class="character-identity">穿梭戰火的情報員</div>
+            </div>
+          </div>
+          <div class="flip-hint">↺ 點擊卡片翻面查看線索與音訊</div>
+        </div>
+        <div class="card-back">
+          <div>
+            <div class="motto-box">「只要腳步還能動，戰火再大，這封信也一定要送到兄弟手上。」</div>
+            <button class="audio-btn" onclick="playAudio(event, '（爆炸警報音）敵機空襲！快躲進碉堡！這封電報記載著寶藏的位置，死也不能丟！')">
+              🔊 播放 5秒語音台詞
+            </button>
+          </div>
+          <div class="info-group">
+            <div class="tag-clue">🔍 線索：機槍碉堡牆面彈孔、軍事密碼電報盤</div>
+            <div class="tag-emotion">❤️ 情感側重：戰地情報 × 兄弟信任 × 電報破譯</div>
+            <p><strong>人物背景：</strong>冒著空襲危險在碉堡與聚落間傳遞情報，寧死不洩漏同伴名單。</p>
+          </div>
+          <div class="info-group items-list">
+            <strong>隨身道具：</strong>綠色復古郵包、軍事電報解碼盤
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. 方德文 -->
+    <div class="card-container line-b" onclick="toggleFlip(this)">
+      <div class="card-inner">
+        <div class="card-front">
+          <div>
+            <span class="badge badge-b">線路 B</span>
+            <img class="avatar-photo" src="characters/char-09-fang-de-wen.jpg" alt="方德文">
+            <div class="character-title-group">
+              <div class="character-name">方德文 <span class="character-age">(約30歲)</span></div>
+              <div class="character-identity">東港溪水利專家</div>
+            </div>
+          </div>
+          <div class="flip-hint">↺ 點擊卡片翻面查看線索與音訊</div>
+        </div>
+        <div class="card-back">
+          <div>
+            <div class="motto-box">「水流會變，地貌會改，但經緯度記下的承諾，永不褪色。」</div>
+            <button class="audio-btn" onclick="playAudio(event, '（羅盤轉動聲）轉動黃銅羅盤……對準東港溪三角點！黃金和地契就埋在水岸暗格下方！')">
+              🔊 播放 5秒語音台詞
+            </button>
+          </div>
+          <div class="info-group">
+            <div class="tag-clue">🔍 線索：東港溪三角點經緯度、黃銅羅盤</div>
+            <div class="tag-emotion">❤️ 情感側重：地理測量 × 空間解密 × 寶藏定位</div>
+            <p><strong>人物背景：</strong>利用測量儀器精確定位日軍藏匿黃金與土地地契的「東港溪水岸暗格」。</p>
+          </div>
+          <div class="info-group items-list">
+            <strong>隨身道具：</strong>黃銅羅盤、三角點測量筆記本
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. 孫采清 -->
+    <div class="card-container line-b" onclick="toggleFlip(this)">
+      <div class="card-inner">
+        <div class="card-front">
+          <div>
+            <span class="badge badge-b">線路 B</span>
+            <img class="avatar-photo" src="characters/char-10-sun-cai-qing.jpg" alt="孫采清">
+            <div class="character-title-group">
+              <div class="character-name">孫采清 <span class="character-age">(約26歲)</span></div>
+              <div class="character-identity">救死扶傷的包紮員</div>
+            </div>
+          </div>
+          <div class="flip-hint">↺ 點擊卡片翻面查看線索與音訊</div>
+        </div>
+        <div class="card-back">
+          <div>
+            <div class="motto-box">「包紮傷口能治癒肉體，但搶回屬於土地的記憶，才能救活這個時代。」</div>
+            <button class="audio-btn" onclick="playAudio(event, '（繃帶撕開聲）別動！我幫你包紮。父親留下的醫案裡……用血跡標記了搶寶的掩護路線！')">
+              🔊 播放 5秒語音台詞
+            </button>
+          </div>
+          <div class="info-group">
+            <div class="tag-clue">🔍 線索：血染醫案掩護路線、十字急救木盒</div>
+            <div class="tag-emotion">❤️ 情感側重：救死扶傷 × 戰時親情 × 檔案搜查</div>
+            <p><strong>人物背景：</strong>父親曾是戰地醫生，為受傷兄弟掩護治療，留下一份記載寶藏位置的血染醫案。</p>
+          </div>
+          <div class="info-group items-list">
+            <strong>隨身道具：</strong>復古急救箱、血染醫案殘頁
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11. 陳健民 -->
+    <div class="card-container line-b" onclick="toggleFlip(this)">
+      <div class="card-inner">
+        <div class="card-front">
+          <div>
+            <span class="badge badge-b">線路 B</span>
+            <img class="avatar-photo" src="characters/char-11-chen-jian-min.jpg" alt="陳健民">
+            <div class="character-title-group">
+              <div class="character-name">陳健民 <span class="character-age">(約29歲)</span></div>
+              <div class="character-identity">守護在地糧食的農夫</div>
+            </div>
+          </div>
+          <div class="flip-hint">↺ 點擊卡片翻面查看線索與音訊</div>
+        </div>
+        <div class="card-back">
+          <div>
+            <div class="motto-box">「泥土不會撒謊，只要種下信任，戰火裡也能結出希望的果實。」</div>
+            <button class="audio-btn" onclick="playAudio(event, '（腳步踩泥聲）大家快幫忙！把寶藏和地契分裝進這幾籃剛採的蔬果底下，運出去！')">
+              🔊 播放 5秒語音台詞
+            </button>
+          </div>
+          <div class="info-group">
+            <div class="tag-clue">🔍 線索：農場藏寶分裝地圖、蔬果籃暗格</div>
+            <div class="tag-emotion">❤️ 情感側重：大地體驗 × 實體採集 × 團體協作</div>
+            <p><strong>人物背景：</strong>在戰火下帶領兄弟們深入農場採集蔬果資產，將寶藏分裝藏匿於農產品箱中。</p>
+          </div>
+          <div class="info-group items-list">
+            <strong>隨身道具：</strong>採集竹籃、農場藏寶地圖
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 12. 趙崇禮 -->
+    <div class="card-container line-b" onclick="toggleFlip(this)">
+      <div class="card-inner">
+        <div class="card-front">
+          <div>
+            <span class="badge badge-b">線路 B</span>
+            <img class="avatar-photo" src="characters/char-12-zhao-chong-li.jpg" alt="趙崇禮">
+            <div class="character-title-group">
+              <div class="character-name">趙崇禮 <span class="character-age">(約35歲)</span></div>
+              <div class="character-identity">資助搶寶行動的暗黑大亨</div>
+            </div>
+          </div>
+          <div class="flip-hint">↺ 點擊卡片翻面查看線索與音訊</div>
+        </div>
+        <div class="card-back">
+          <div>
+            <div class="motto-box">「算盤撥的是利益，但這一次，我要撥的是崁頂未來的命脈。」</div>
+            <button class="audio-btn" onclick="playAudio(event, '（算盤碰撞聲）表面上我是日方的合作商，但這算盤一響……所有資金已暗中注入你們的搶寶行動！')">
+              🔊 播放 5秒語音台詞
+            </button>
+          </div>
+          <div class="info-group">
+            <div class="tag-clue">🔍 線索：黃銅算盤暗號、商會黃金對接印章</div>
+            <div class="tag-emotion">❤️ 情感側重：雙重身分 × 陣營調度 × 資源對接</div>
+            <p><strong>人物背景：</strong>表面上配合日方，實際上提供所有資金與物資，支援這群年輕人搶回財富。</p>
+          </div>
+          <div class="info-group items-list">
+            <strong>隨身道具：</strong>黃銅復古算盤、商會黃金對接印章
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- 體驗流程 -->
+<section class="card">
+  <h2>🎬 四大幕次體驗流程</h2>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-title">幕 1：戰雲密布・雙線成團</div>
+      <p><strong>地點：</strong>園區大門／報到處</p>
+      <p><strong>流程：</strong>12人報到換裝 → 領取復古道具包 → 分流 A/B 線</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-title">幕 2：交織的秘密（雙線平行實境任務）</div>
+      <p><strong>地點：</strong>古厝老宅區／懸疑公廨區／農產甜點區／戰地碉堡與糖鐵區</p>
+      <p><strong>線路 A 任務：</strong></p>
+      <ul style="margin-left: 20px;">
+        <li>老宅撕裂的合照（拼湊照片 → 發現禁忌之戀與封印信件）</li>
+        <li>阿嬤的古老咒詞（公廨神桌下透光符咒 → 血脈牽絆）</li>
+        <li>麻油與甜點的暗號（嗅覺辨識 → 地下密道按鈕；甜點排列 → 最後誓言）</li>
+      </ul>
+      <p style="margin-top: 8px;"><strong>線路 B 任務：</strong></p>
+      <ul style="margin-left: 20px;">
+        <li>汽笛響起與黃金地圖（糖鐵車廂佈景 → 運輸清單）</li>
+        <li>碉堡絕密救援（電報機解碼 → 日軍炸毀東港溪水岸計畫）</li>
+        <li>大地糧食搶救（鮮採體驗 → 寶藏分裝竹籃）</li>
+      </ul>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-title">幕 3：港東素食閣午宴（情報交換與真相大白）</div>
+      <p><strong>地點：</strong>港東素食閣</p>
+      <p><strong>劇情轉折：</strong>A線私人信件揭露B線寶藏真位置；B線地契成為A線撕裂合照解藥。</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-title">幕 4：寶藏重見天日與居民「破壁」結尾</div>
+      <p><strong>地點：</strong>崁頂生態公園（湖畔石台）</p>
+      <p><strong>終章：</strong>合力放置麻油密碼、無花果暗號、黃金地契與鮮採農作物 → 音效轉歡快 → 居民登場遞蓮藕茶與好桔包子 → 破壁回到現實崁頂。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 微電影資訊 -->
+<section class="card">
+  <h2>🎞️ 2 小時快取「個人劇情微電影」</h2>
+  <ul style="margin-left: 20px;">
+    <li><strong>產出時間：</strong>體驗結束 2 小時內</li>
+    <li><strong>格式：</strong>9:16 直式</li>
+    <li><strong>風格：</strong>電影級調色、復古膠片特效、戰火硝煙與古厝光影</li>
+    <li><strong>個人獨白：</strong>有（每人 30–60 秒，記錄角色高光時刻）</li>
+    <li><strong>社群 Hashtag：</strong>#崁頂時空圖鑑 #糖鐵搶寶 #撕裂的家族合照</li>
+  </ul>
+  <p class="muted" style="margin-top: 8px;">範例獨白：「汽笛響起那一刻，我沒有後退，因為我身後是我要保護的兄弟和土地……」</p>
+</section>
+
+<!-- 角色與道具總覽表（可搜尋、匯出） -->
+<section class="card">
+  <h2>📊 角色與道具總覽表</h2>
+  <p class="muted">資料自動整理自上方 12 張角色卡，可搜尋、依線路篩選，並匯出 JSON / CSV 給道具組或執行人員使用。</p>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;margin:14px 0;align-items:center;">
+    <input id="tableSearch" type="text" placeholder="搜尋姓名／道具／線索…" oninput="renderCharacterTable()"
+      style="flex:1;min-width:180px;padding:8px 12px;border:1px solid var(--border-color);border-radius:6px;font-family:inherit;font-size:14px;">
+    <select id="tableLineFilter" onchange="renderCharacterTable()"
+      style="padding:8px 12px;border:1px solid var(--border-color);border-radius:6px;font-family:inherit;font-size:14px;">
+      <option value="all">全部線路</option>
+      <option value="A">線路 A</option>
+      <option value="B">線路 B</option>
+    </select>
+    <button class="filter-btn" onclick="exportCharactersJSON()">⬇ 匯出 JSON</button>
+    <button class="filter-btn" onclick="exportCharactersCSV()">⬇ 匯出 CSV</button>
+  </div>
+  <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead>
+        <tr style="text-align:left;border-bottom:2px solid var(--accent-gold);">
+          <th style="padding:8px 6px;">線路</th>
+          <th style="padding:8px 6px;">姓名</th>
+          <th style="padding:8px 6px;">年齡</th>
+          <th style="padding:8px 6px;">身分</th>
+          <th style="padding:8px 6px;">隨身道具</th>
+          <th style="padding:8px 6px;">關鍵線索</th>
+        </tr>
+      </thead>
+      <tbody id="characterTableBody"></tbody>
+    </table>
+  </div>
+  <p class="muted" id="tableEmptyState" style="display:none;margin-top:10px;">沒有符合搜尋條件的角色。</p>
+</section>
+
+<!-- 後續規劃項目（誠實標註尚未實作，避免與已完成功能混淆） -->
+<section class="card">
+  <h2>📍 後續規劃項目（尚未實作）</h2>
+  <p class="muted">以下為企劃階段構想，目前頁面還沒有這些視圖，先列出以利後續開發排序：</p>
+  <ul style="margin-left: 20px;">
+    <li>場地動線與站點熱區地圖層</li>
+    <li>任務解謎依賴關係節點圖</li>
+    <li>微電影產出進度看板（每人狀態）</li>
+    <li>PDF 企劃書一鍵匯出</li>
+  </ul>
+</section>
+
+<!-- 美食資訊區塊 -->
+<section class="card">
+  <h2>🍜 崁頂美食地圖：美食也是不可或缺的一環</h2>
+  <p class="muted">本次旅程會相遇的在地店家與美味信物</p>
+  <div class="food-grid">
+    <div class="food-card">
+      <div>
+        <div class="food-name">崁頂義興麻油廠</div>
+        <div class="food-village">📍 崁頂村｜屏東縣崁頂鄉中正路</div>
+        <p>百年麻油廠，古法石磨胡麻油，香氣濃郁，是劇中「嗅覺密碼」的靈感來源。</p>
+      </div>
+      <div class="food-tags">
+        <span class="food-tag">麻油</span>
+        <span class="food-tag">百年老店</span>
+        <span class="food-tag">古法石磨</span>
+      </div>
+    </div>
+    <div class="food-card">
+      <div>
+        <div class="food-name">洲子無花果農莊</div>
+        <div class="food-village">📍 洲子村｜屏東縣崁頂鄉洲子村</div>
+        <p>鮮採無花果與甜點，微酸微甜如戰時秘密，是劇中「甜蜜暗號」的關鍵道具。</p>
+      </div>
+      <div class="food-tags">
+        <span class="food-tag">無花果</span>
+        <span class="food-tag">甜點</span>
+        <span class="food-tag">農莊體驗</span>
+      </div>
+    </div>
+    <div class="food-card">
+      <div>
+        <div class="food-name">好桔包子</div>
+        <div class="food-village">📍 崁頂村｜屏東縣崁頂鄉崁頂村</div>
+        <p>老鄉長與心上人私定終身的信物，也是後人尋找歷史真相的鑰匙。</p>
+      </div>
+      <div class="food-tags">
+        <span class="food-tag">包子</span>
+        <span class="food-tag">記憶的滋味</span>
+        <span class="food-tag">劇情信物</span>
+      </div>
+    </div>
+    <div class="food-card">
+      <div>
+        <div class="food-name">蓮藕茶</div>
+        <div class="food-village">📍 崁頂村｜崁頂生態公園（終章場景）</div>
+        <p>終章居民遞給玩家的溫暖茶飲，象徵戰爭陰霾散去，回到現實崁頂的平靜生活。</p>
+      </div>
+      <div class="food-tags">
+        <span class="food-tag">蓮藕茶</span>
+        <span class="food-tag">破壁結尾</span>
+        <span class="food-tag">溫暖滋味</span>
+      </div>
+    </div>
+    <div class="food-card">
+      <div>
+        <div class="food-name">港東素食閣</div>
+        <div class="food-village">📍 港東村｜屏東縣崁頂鄉港東村</div>
+        <p>午宴情報交換地點，精緻在地素食佳餚，讓玩家在味覺中拼湊真相。</p>
+      </div>
+      <div class="food-tags">
+        <span class="food-tag">素食</span>
+        <span class="food-tag">午宴</span>
+        <span class="food-tag">情報交換</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="footer">
+  <p>本頁面由 HTML/CSS 自動生成與呈現｜崁頂時空圖鑑企劃團隊</p>
+</div>
+
+</div>
+
+<script>
+  // 點擊翻卡功能
+  function toggleFlip(container) {
+    container.classList.toggle('flipped');
+  }
+
+  // 線路篩選功能
+  function filterLine(evt, line) {
+    const cards = document.querySelectorAll('.card-container');
+    const buttons = document.querySelectorAll('.filter-btn');
+
+    buttons.forEach(btn => btn.classList.remove('active'));
+    evt.target.classList.add('active');
+
+    cards.forEach(card => {
+      if (line === 'all') {
+        card.style.display = 'block';
+      } else {
+        if (card.classList.contains(line)) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      }
+    });
+  }
+
+  // 模擬語音台詞播放
+  function playAudio(event, text) {
+    event.stopPropagation(); // 阻止觸發翻牌
+    alert("🎙️ [角色語音試聽]\n\n" + text);
+  }
+
+  /* ======================================
+     角色資料整理：從既有的 12 張角色卡 DOM
+     自動萃取資料，作為總覽表 / 匯出功能的唯一資料來源，
+     避免另外手動維護一份角色清單造成資料不同步。
+  ====================================== */
+  function buildCharacterData() {
+    const containers = document.querySelectorAll('#characterGrid .card-container');
+    const data = [];
+    containers.forEach(c => {
+      const line = c.classList.contains('line-a') ? 'A' : (c.classList.contains('line-b') ? 'B' : '');
+
+      const nameEl = c.querySelector('.character-name');
+      let name = '', age = '';
+      if (nameEl) {
+        const ageEl = nameEl.querySelector('.character-age');
+        age = ageEl ? ageEl.textContent.trim() : '';
+        const clone = nameEl.cloneNode(true);
+        const ageClone = clone.querySelector('.character-age');
+        if (ageClone) ageClone.remove();
+        name = clone.textContent.trim();
+      }
+
+      const identityEl = c.querySelector('.character-identity');
+      const identity = identityEl ? identityEl.textContent.trim() : '';
+
+      const clueEl = c.querySelector('.tag-clue');
+      const clue = clueEl ? clueEl.textContent.trim().replace(/^🔍\s*線索：/, '') : '';
+
+      const itemsEl = c.querySelector('.items-list');
+      const items = itemsEl ? itemsEl.textContent.trim().replace(/^隨身道具：/, '') : '';
+
+      data.push({ line, name, age, identity, clue, items });
+    });
+    return data;
+  }
+
+  let charactersData = [];
+
+  // 依搜尋字串與線路篩選重新渲染總覽表
+  function renderCharacterTable() {
+    const searchInput = document.getElementById('tableSearch');
+    const lineSelect = document.getElementById('tableLineFilter');
+    const body = document.getElementById('characterTableBody');
+    const emptyState = document.getElementById('tableEmptyState');
+    if (!body) return;
+
+    const keyword = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    const lineValue = lineSelect ? lineSelect.value : 'all';
+
+    const filtered = charactersData.filter(row => {
+      if (lineValue !== 'all' && row.line !== lineValue) return false;
+      if (!keyword) return true;
+      const haystack = [row.name, row.identity, row.items, row.clue].join(' ').toLowerCase();
+      return haystack.includes(keyword);
+    });
+
+    body.innerHTML = filtered.map(row => `
+      <tr style="border-bottom:1px solid var(--border-color);">
+        <td style="padding:7px 6px;"><span class="badge ${row.line === 'A' ? 'badge-a' : 'badge-b'}">線路 ${row.line}</span></td>
+        <td style="padding:7px 6px;font-weight:bold;">${row.name}</td>
+        <td style="padding:7px 6px;">${row.age}</td>
+        <td style="padding:7px 6px;">${row.identity}</td>
+        <td style="padding:7px 6px;">${row.items}</td>
+        <td style="padding:7px 6px;">${row.clue}</td>
+      </tr>
+    `).join('');
+
+    if (emptyState) emptyState.style.display = filtered.length ? 'none' : 'block';
+  }
+
+  // 依實際卡片數量更新篩選按鈕上的人數標示
+  function updateFilterCounts() {
+    const total = charactersData.length;
+    const countA = charactersData.filter(r => r.line === 'A').length;
+    const countB = charactersData.filter(r => r.line === 'B').length;
+    const btnAll = document.getElementById('filterBtnAll');
+    const btnA = document.getElementById('filterBtnA');
+    const btnB = document.getElementById('filterBtnB');
+    if (btnAll) btnAll.textContent = `全部角色 (${total})`;
+    if (btnA) btnA.textContent = `線路 A：血脈、信仰與禁忌之戀 (${countA})`;
+    if (btnB) btnB.textContent = `線路 B：戰爭、寶藏與戰地友情 (${countB})`;
+  }
+
+  function downloadFile(filename, content, mime) {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function exportCharactersJSON() {
+    downloadFile('崁頂角色清單.json', JSON.stringify(charactersData, null, 2), 'application/json;charset=utf-8');
+  }
+
+  function exportCharactersCSV() {
+    const header = ['線路', '姓名', '年齡', '身分', '隨身道具', '關鍵線索'];
+    const escapeCsv = v => `"${String(v).replace(/"/g, '""')}"`;
+    const rows = charactersData.map(r => [r.line, r.name, r.age, r.identity, r.items, r.clue].map(escapeCsv).join(','));
+    const csv = '\uFEFF' + [header.map(escapeCsv).join(','), ...rows].join('\r\n');
+    downloadFile('崁頂角色清單.csv', csv, 'text/csv;charset=utf-8');
+  }
+
+  // 頁面載入後：整理角色資料、更新篩選人數、渲染總覽表
+  document.addEventListener('DOMContentLoaded', function () {
+    charactersData = buildCharacterData();
+    updateFilterCounts();
+    renderCharacterTable();
+  });
+</script>
+</body>
+</html>

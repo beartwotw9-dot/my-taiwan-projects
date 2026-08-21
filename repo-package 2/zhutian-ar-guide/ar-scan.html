@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>竹田頓物驛站｜真實掃描 AR（測試版）</title>
+
+<!-- MindAR + A-Frame：真正的「掃描圖片才觸發內容」引擎 -->
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+<style>
+:root{
+  --wood:#8b5a2b;--wood-dark:#5c3a19;--amber:#f59e0b;--red:#e11d48;
+  --primary:#2d5a27;--primary-light:#4ade80;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC",Arial,sans-serif}
+html,body{height:100%;overflow:hidden;background:#000}
+#scene-container{position:fixed;inset:0}
+
+/* 頂部狀態列 */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:50;background:linear-gradient(180deg,rgba(15,23,42,.92),rgba(15,23,42,0));padding:14px 16px 30px;color:#fff}
+.topbar h1{font-size:.95rem}
+.topbar .sub{font-size:.66rem;color:#94a3b8;margin-top:2px}
+.status{margin-top:8px;display:flex;align-items:center;gap:6px;font-size:.72rem}
+.status .dot{width:7px;height:7px;border-radius:50%;background:#64748b}
+.status.scanning .dot{background:var(--amber);animation:blink 1.4s infinite}
+.status.found .dot{background:var(--primary-light)}
+@keyframes blink{50%{opacity:.25}}
+
+/* 進度條（8 站） */
+.progressbar{position:fixed;top:78px;left:16px;right:16px;z-index:50;display:flex;gap:4px}
+.progressbar .seg{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.25)}
+.progressbar .seg.done{background:var(--primary-light)}
+
+/* 底部提示 / 內容卡 */
+.bottom-sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(15,23,42,.94);backdrop-filter:blur(14px);color:#fff;border-radius:22px 22px 0 0;padding:18px 18px 26px;transition:transform .35s ease;transform:translateY(0);max-height:60vh;overflow-y:auto}
+.bottom-sheet.hint-only{padding:16px 18px 22px}
+.hint-text{font-size:.82rem;color:#cbd5e1;text-align:center}
+.hint-text b{color:#fff}
+
+.found-card h3{font-size:1.05rem;color:var(--amber);margin-bottom:6px}
+.found-card p{font-size:.82rem;color:#e2e8f0;line-height:1.6}
+.found-card .tag{display:inline-block;background:rgba(74,222,128,.15);color:var(--primary-light);border:1px solid rgba(74,222,128,.4);padding:3px 9px;border-radius:12px;font-size:.68rem;margin-bottom:8px}
+.btn{background:var(--wood);color:#fff;border:0;border-radius:12px;padding:10px 14px;font-size:.8rem;font-weight:700;cursor:pointer;width:100%;margin-top:10px}
+.btn.green{background:var(--primary)}
+.btn:active{transform:scale(.98)}
+
+/* 沒有 targets.mind 時的設定提醒畫面 */
+.setup-notice{position:fixed;inset:0;z-index:100;background:#0f172a;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;gap:12px}
+.setup-notice h2{font-size:1.1rem;color:var(--amber)}
+.setup-notice p{font-size:.82rem;color:#cbd5e1;line-height:1.7;max-width:340px}
+.setup-notice code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:5px;font-size:.78rem}
+.setup-notice a{color:var(--primary-light)}
+</style>
+</head>
+<body>
+
+<!-- 找不到 targets.mind 時顯示的設定提醒（見下方 checkTargetsFile） -->
+<div class="setup-notice" id="setupNotice" style="display:none">
+  <h2>⚠️ 還沒有掃描目標檔案</h2>
+  <p>
+    這個頁面需要一個 <code>targets.mind</code> 檔案，才知道要辨識哪些測試圖片。<br><br>
+    請先用官方免費工具，把你要拿來測試的 1～8 張照片編譯成 <code>targets.mind</code>：<br>
+    <a href="https://hiukim.github.io/mind-ar-js-doc/tools/compile/" target="_blank" rel="noopener">
+      hiukim.github.io/mind-ar-js-doc/tools/compile
+    </a><br><br>
+    編譯完下載 <code>targets.mind</code> 後，放到跟這個 <code>ar-scan.html</code>
+    「同一個資料夾」，重新整理這一頁就會自動生效。
+  </p>
+  <p style="font-size:.72rem;color:#94a3b8">
+    （測試建議：把 8 張圖片依序印出來或顯示在另一台螢幕上，
+    對應「站 1 ～ 站 8」，用手機瀏覽器打開這頁掃描它們。）
+  </p>
+</div>
+
+<div id="app" style="display:none">
+  <div class="topbar">
+    <h1>🚂 竹田頓物驛站｜真實掃描 AR（測試版）</h1>
+    <div class="sub">用相機對準已編譯的測試圖片，會自動觸發對應任務內容</div>
+    <div class="status scanning" id="statusLine">
+      <span class="dot"></span><span id="statusText">掃描中…尚未偵測到目標</span>
+    </div>
+  </div>
+
+  <div class="progressbar" id="progressBar"></div>
+
+  <div id="scene-container"></div>
+
+  <div class="bottom-sheet hint-only" id="bottomSheet">
+    <div class="hint-text" id="hintText">
+      請將鏡頭對準測試圖片 1～8 其中一張，畫面會自動辨識並顯示任務內容。
+    </div>
+  </div>
+</div>
+
+<script>
+/* ======================================
+   沿用主 App 的 8 站任務資料（arData）
+   ====================================== */
+const arData = {
+  1:{sense:"視覺",label:"木造舊站",task:"解鎖昔日車票圖騰與日式木造結構細節"},
+  2:{sense:"聽覺",label:"紅磚倉庫",task:"聆聽火車過站汽笛聲與池上一郎文庫黑膠音樂"},
+  3:{sense:"觸覺",label:"舊澡堂古井",task:"點擊螢幕壓水，觸發擬真水流與震動反饋"},
+  4:{sense:"提醒",label:"釀造米倉",task:"釀造米倉為導覽提醒區，請依現場指示參觀，不列入互動任務"},
+  5:{sense:"嗅覺",label:"樟腦花園",task:"掃描客家盤花與樟腦樹，捕捉氣味分子卡牌"},
+  6:{sense:"人文",label:"李秀雲攝影館",task:"重現 50 年代客家農村生活視覺疊影與故事說明"},
+  7:{sense:"地景",label:"舊月台",task:"模擬蒸汽火車鳴笛進站，提供虛擬合影拍照功能"},
+  8:{sense:"工藝",label:"德興米廠",task:"透視木造碾米機內部齒輪與稻穀去殼運作原理"}
+};
+
+let foundStations = new Set();
+
+function renderProgressBar(){
+  const bar = document.getElementById("progressBar");
+  bar.innerHTML = "";
+  for (let i = 1; i <= 8; i++){
+    const seg = document.createElement("div");
+    seg.className = "seg" + (foundStations.has(i) ? " done" : "");
+    bar.appendChild(seg);
+  }
+}
+
+function showFound(stationIndex){
+  const n = stationIndex + 1; // targetIndex 0-7 -> 站 1-8
+  const data = arData[n];
+  if (!data) return;
+
+  foundStations.add(n);
+  renderProgressBar();
+
+  document.getElementById("statusLine").className = "status found";
+  document.getElementById("statusText").textContent = `✅ 已辨識：${data.label}`;
+
+  const sheet = document.getElementById("bottomSheet");
+  sheet.classList.remove("hint-only");
+  sheet.innerHTML = `
+    <div class="found-card">
+      <span class="tag">${data.sense}任務</span>
+      <h3>📍 ${data.label}</h3>
+      <p>${data.task}</p>
+      <button class="btn green" onclick="dismissFound()">✓ 記錄本次掃描，繼續尋找下一站</button>
+    </div>
+  `;
+}
+
+function showLost(){
+  document.getElementById("statusLine").className = "status scanning";
+  document.getElementById("statusText").textContent = "掃描中…尚未偵測到目標";
+}
+
+function dismissFound(){
+  const sheet = document.getElementById("bottomSheet");
+  sheet.classList.add("hint-only");
+  sheet.innerHTML = `<div class="hint-text">請將鏡頭對準測試圖片 1～8 其中一張，畫面會自動辨識並顯示任務內容。<br><b>${foundStations.size} / 8</b> 站已記錄</div>`;
+}
+
+/* ======================================
+   檢查 targets.mind 是否存在；沒有的話顯示設定提醒，
+   而不是讓相機在沒有目標的情況下空轉。
+   ====================================== */
+async function checkTargetsFile(){
+  try{
+    const res = await fetch("targets.mind", { method: "HEAD" });
+    if (!res.ok) throw new Error("not found");
+    initScene();
+  }catch(e){
+    document.getElementById("setupNotice").style.display = "flex";
+  }
+}
+
+function initScene(){
+  document.getElementById("app").style.display = "block";
+  renderProgressBar();
+
+  const container = document.getElementById("scene-container");
+  container.innerHTML = `
+    <a-scene mindar-image="imageTargetSrc: targets.mind; autoStart: true; uiScanning: no; uiLoading: no;"
+      color-space="sRGB" renderer="colorManagement: true" vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false" embedded style="width:100%;height:100%">
+      <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;"></a-camera>
+      ${[0,1,2,3,4,5,6,7].map(i => `
+        <a-entity id="target-${i}" mindar-image-target="targetIndex: ${i}">
+          <a-plane color="#4ade80" opacity="0.15" position="0 0 0" height="1" width="1" rotation="0 0 0"></a-plane>
+        </a-entity>
+      `).join("")}
+    </a-scene>
+  `;
+
+  // 等 a-scene 建好後，掛上每個目標的 found/lost 事件
+  setTimeout(() => {
+    for (let i = 0; i < 8; i++){
+      const el = document.getElementById(`target-${i}`);
+      if (!el) continue;
+      el.addEventListener("targetFound", () => showFound(i));
+      el.addEventListener("targetLost", () => showLost());
+    }
+  }, 300);
+}
+
+checkTargetsFile();
+</script>
+</body>
+</html>

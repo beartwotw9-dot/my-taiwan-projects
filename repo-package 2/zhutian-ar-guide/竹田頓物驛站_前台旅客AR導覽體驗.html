@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>竹田頓物驛站｜10 大主題 AR 漫遊</title>
+<style>
+:root{
+  --primary:#2d5a27;--primary-light:#4ade80;--wood:#8b5a2b;--wood-dark:#5c3a19;
+  --amber:#f59e0b;--red:#e11d48;--cream:#fdfbf7;--dark:#0f172a;
+  --text:#1e293b;--muted:#64748b;--line:#e2e8f0;--shadow:0 8px 24px rgba(0,0,0,.08)
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC",Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:#121824;color:var(--text);min-height:100vh;display:flex;justify-content:center;align-items:center}
+button{font:inherit}
+.app{width:100%;max-width:430px;height:100vh;max-height:932px;background:var(--cream);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+@media(min-width:450px){.app{height:90vh;border:8px solid #2d3748;border-radius:36px}}
+.header{background:linear-gradient(135deg,#1e293b,#0f172a);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;z-index:20}
+.header h1{font-size:1rem}.subtitle{font-size:.62rem;color:#94a3b8;margin-top:2px}
+.gps{background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.4);color:var(--primary-light);font-size:.68rem;padding:4px 8px;border-radius:12px;display:flex;gap:5px;align-items:center;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--primary-light);animation:blink 1.5s infinite}@keyframes blink{50%{opacity:.3}}
+.progress{background:#2d3748;color:#cbd5e1;padding:7px 14px;font-size:.72rem;display:flex;align-items:center;gap:8px}
+.track{height:6px;background:#475569;border-radius:3px;overflow:hidden;flex:1}.fill{height:100%;width:10%;background:linear-gradient(90deg,var(--amber),var(--primary-light));transition:.35s}
+.body{flex:1;overflow-y:auto;background:var(--cream)}
+.tab{display:none;padding:16px;gap:14px}.tab.active{display:flex;flex-direction:column}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow)}
+.title{font-size:.95rem;font-weight:800;color:var(--wood-dark);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.desc{font-size:.78rem;color:var(--muted);line-height:1.5}
+.btn{background:var(--wood);color:#fff;border:0;border-radius:12px;padding:9px 13px;font-size:.78rem;font-weight:700;cursor:pointer}
+.btn.full{width:100%}.btn.green{background:var(--primary)}.btn.amber{background:var(--amber);color:#331800}.btn.dark{background:#1e1b4b}.btn.red{background:var(--red)}
+.btn:active{transform:scale(.98)}
+/* AR */
+.ar{height:100%;min-height:560px;background:#000;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between}
+.camera{position:absolute;inset:0;background:radial-gradient(circle at center,#334155 0,#090d16 80%)}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(56,189,248,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.05) 1px,transparent 1px);background-size:30px 30px}
+.target{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);width:230px;height:230px;border:2px dashed rgba(245,158,11,.75);border-radius:20px;z-index:2;animation:pulse 2s infinite}
+@keyframes pulse{50%{transform:translate(-50%,-50%) scale(1.03);border-color:rgba(74,222,128,.9)}}
+.chips{position:relative;z-index:8;display:flex;flex:0 0 auto;gap:8px;overflow-x:auto;overflow-y:hidden;padding:10px;scrollbar-width:none;touch-action:pan-x;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;max-width:100%;white-space:nowrap}.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;user-select:none;-webkit-user-select:none;touch-action:pan-x;background:rgba(15,23,42,.88);color:#cbd5e1;border:1px solid rgba(255,255,255,.15);padding:8px 12px;border-radius:20px;font-size:.75rem;white-space:nowrap;cursor:pointer}.chip.active{background:var(--wood);color:#fff;border-color:var(--amber)}.chip.done::after{content:" ✓";color:var(--primary-light)}
+.overlay{position:absolute;z-index:4;top:40%;left:50%;transform:translate(-50%,-50%);width:88%;text-align:center}
+.ticket,.puzzle,.mini{background:rgba(15,23,42,.95);color:#fff;border-radius:16px;padding:16px;box-shadow:0 15px 35px rgba(0,0,0,.6)}
+.ticket{background:#fffbe0;color:#5c3a19;border:2px dashed var(--wood)}.ticket h3{color:#331800;margin:5px 0}.puzzle h3,.mini h3{color:var(--amber);font-size:1rem;margin-bottom:7px}
+.options{display:flex;flex-direction:column;gap:7px;margin-top:10px}.opt{background:#0f172a;border:1px solid #334155;color:#e2e8f0;padding:9px 11px;border-radius:9px;text-align:left;cursor:pointer;font-size:.8rem}
+.bags{display:flex;justify-content:center;gap:10px;margin:13px 0}.bag{width:62px;height:62px;border:2px solid #334155;border-radius:13px;background:#1e293b;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer}
+.ar-bottom{position:relative;z-index:5;background:rgba(15,23,42,.93);backdrop-filter:blur(12px);color:#fff;padding:16px;border-radius:22px 22px 0 0;text-align:center}.hint{font-size:.8rem;color:#94a3b8;margin-bottom:10px}
+/* 10 missions */
+.photo{background:#f8fafc;border:1px dashed var(--wood);border-radius:12px;padding:12px;text-align:center}.hakka{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.hakka button{background:#fff;border:1px solid #cbd5e1;padding:8px;border-radius:8px;font-size:.76rem;cursor:pointer}.correct{background:#dcfce7!important;border-color:#22c55e!important;color:#15803d}
+.postcard{height:140px;border-radius:12px;background:linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.35)),url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80') center/cover;display:flex;align-items:flex-end;padding:11px;color:#fff;position:relative}.poststamp{position:absolute;right:10px;top:10px;border:2px dashed var(--amber);background:#fff;color:#333;padding:7px;border-radius:5px}
+.map-toggle{display:flex;background:#e2e8f0;border-radius:20px;padding:3px;gap:4px;margin-bottom:10px}.map-toggle button{flex:1;border:0;background:transparent;padding:7px;border-radius:16px;font-size:.76rem;font-weight:700;color:var(--muted);cursor:pointer}.map-toggle .on{background:#fff;color:var(--primary);box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.map{height:315px;border-radius:12px;background:#e0f2fe;border:1px solid #bae6fd;display:flex;align-items:stretch;justify-content:stretch;text-align:left;padding:10px;font-size:.82rem;font-weight:700;color:#0369a1;overflow-y:auto}
+.story{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none}.story::-webkit-scrollbar{display:none}.storycard{flex:0 0 155px;border:1px solid var(--line);border-radius:12px;padding:8px;background:#fff}.storyimg{height:90px;border-radius:8px;background-size:cover;background-position:center;margin-bottom:6px}
+.audio{background:#0f172a;color:#fff;border-radius:12px;padding:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.stamps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stamp{background:#fffbe0;border:2px dashed var(--wood);border-radius:10px;padding:10px 5px;text-align:center}.stamp.locked{opacity:.35;filter:grayscale(1)}
+.coupon{background:linear-gradient(135deg,#2d5a27,#1b3a18);color:#fff;border-radius:16px;padding:15px;display:flex;justify-content:space-between;align-items:center;gap:10px}.coupon h4{font-size:.88rem;color:var(--amber);margin-bottom:3px}.coupon p{font-size:.7rem;color:#e2e8f0;line-height:1.35}
+.nav{background:#fff;border-top:1px solid var(--line);display:flex;z-index:20;padding:7px 0 10px}.navitem{flex:1;text-align:center;color:var(--muted);font-size:.62rem;cursor:pointer;padding:0 1px}.navitem.active{color:var(--primary);font-weight:800}.navicon{font-size:1.2rem;display:block;margin-bottom:2px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center
+;justify-content:center;padding:20px}.modal.show{display:flex}.modalbox{background:#fff;border-radius:20px;padding:20px;width:100%;max-width:330px;max-height:80vh;overflow:auto;text-align:center}.close{background:#e2e8f0;border:0;border-radius:20px;padding:8px 20px;margin-top:12px;font-weight:700;cursor:pointer}
+/* ================================
+   竹田車站｜8 大互動任務
+================================ */
+
+.task8-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.task8-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 15px;
+    padding: 13px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    cursor: pointer;
+    transition: all .2s ease;
+}
+
+.task8-card:hover {
+    transform: translateY(-2px);
+    border-color: #8b5a2b;
+    box-shadow: 0 5px 15px rgba(0,0,0,.08);
+}
+
+.task8-card:active {
+    transform: scale(.98);
+}
+
+.task8-card.done {
+    border-color: #22c55e;
+    background: #f0fdf4;
+}
+
+.task8-card.done .task8-icon {
+    background: #dcfce7;
+}
+
+.task8-card.done .task8-arrow {
+    color: #16a34a;
+}
+
+.task8-icon {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: 13px;
+    background: #fff7ed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.55rem;
+}
+
+.task8-info {
+    flex: 1;
+}
+
+.task8-info b {
+    display: block;
+    color: #5c3a19;
+    font-size: .82rem;
+    margin-bottom: 3px;
+}
+
+.task8-info p {
+    color: #64748b;
+    font-size: .68rem;
+    line-height: 1.45;
+}
+
+.task8-arrow {
+    color: #8b5a2b;
+    font-size: .72rem;
+    font-weight: 800;
+}
+
+/* 跑步路線 */
+.run-route {
+    position: relative;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 15px;
+    padding: 15px;
+    margin-top: 12px;
+}
+
+.route-line {
+    position: absolute;
+    left: 31px;
+    top: 50px;
+    bottom: 50px;
+    width: 3px;
+    background: repeating-linear-gradient(
+        to bottom,
+        #4ade80 0,
+        #4ade80 8px,
+        transparent 8px,
+        transparent 15px
+    );
+}
+
+.route-point {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 0;
+}
+
+.route-dot {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid #22c55e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .9rem;
+}
+
+.route-point.done .route-dot {
+    background: #22c55e;
+    color: #fff;
+}
+
+.route-point b {
+    font-size: .76rem;
+    color: #166534;
+}
+
+.route-point span {
+    display: block;
+    font-size: .64rem;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+/* 收集物 */
+.collect-items {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 14px 0;
+}
+
+.collect-item {
+    width: 60px;
+    height: 60px;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+}
+
+.collect-item.collected {
+    background: #dcfce7;
+    border-color: #22c55e;
+}
+
+/* 景點按鈕 */
+.place-list {
+    display: grid;
+    gap: 8px;
+}
+
+.place-btn {
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 11px;
+    padding: 10px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.place-btn b {
+    display: block;
+    font-size: .76rem;
+    color: #5c3a19;
+}
+
+.place-btn span {
+    display: block;
+    font-size: .64rem;
+    color: #64748b;
+    margin-top: 3px;
+}
+
+/* 明信片 */
+.postcard-preview {
+    min-height: 210px;
+    border-radius: 16px;
+    padding: 18px;
+    background:
+        linear-gradient(rgba(60,40,20,.25),rgba(60,40,20,.45)),
+        linear-gradient(135deg,#d6b98c,#7c9b72);
+    color: white;
+    position: relative;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.postcard-stamp {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    width: 55px;
+    height: 55px;
+    background: rgba(255,255,255,.9);
+    color: #8b5a2b;
+    border: 2px dashed #8b5a2b;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.postcard-text {
+    position: absolute;
+    bottom: 18px;
+    left: 18px;
+    right: 18px;
+}
+
+.postcard-text h3 {
+    font-size: 1.1rem;
+    margin-bottom: 7px;
+}
+
+.postcard-text p {
+    font-size: .76rem;
+    line-height: 1.6;
+}
+
+/* 花束 */
+.bouquet {
+    text-align: center;
+    background: linear-gradient(135deg,#fff7ed,#fdf2f8);
+    border-radius: 16px;
+    padding: 18px;
+    margin-top: 10px;
+}
+
+.bouquet-icon {
+    font-size: 4rem;
+    animation: flowerFloat 2s ease-in-out infinite;
+}
+
+@keyframes flowerFloat {
+    50% {
+        transform: translateY(-6px) rotate(2deg);
+    }
+}
+
+/* QR */
+.qr-box {
+    width: 190px;
+    height: 190px;
+    margin: 15px auto;
+    background:
+        linear-gradient(90deg,#111 10px,transparent 10px) 0 0/30px 30px,
+        linear-gradient(#111 10px,transparent 10px) 0 0/30px 30px,
+        white;
+    border: 10px solid white;
+    box-shadow: 0 0 0 1px #cbd5e1;
+}
+
+/* 時光郵件 */
+.time-mail {
+    background: #fffbea;
+    border: 2px dashed #b45309;
+    border-radius: 16px;
+    padding: 17px;
+}
+
+.time-mail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f3d9a5;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+
+.time-mail-body {
+    min-height: 100px;
+    font-size: .8rem;
+    line-height: 1.7;
+    color: #5c3a19;
+}
+
+.history-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.history-card{min-height:130px;border:0;border-radius:12px;padding:10px;text-align:left;cursor:pointer;background:linear-gradient(135deg,#fff7ed,#fef3c7);color:#5c3a19}.history-card .back{display:none;font-size:.72rem;line-height:1.55;color:#7c2d12}.history-card.flipped .front{display:none}.history-card.flipped .back{display:block}.history-card small{display:block;color:#92400e;margin-top:5px}.puzzle-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}.puzzle-piece{aspect-ratio:1;border:1px dashed #cbd5e1;border-radius:8px;background:#f8fafc;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.62rem;color:#94a3b8}.puzzle-piece.done{background:linear-gradient(135deg,#fef3c7,#fed7aa);border-color:#f59e0b;color:#7c2d12;font-weight:800}.station-scene{margin-top:12px;border-radius:15px;padding:20px 12px;background:linear-gradient(180deg,#bae6fd 0 55%,#86efac 55%);text-align:center;color:#5c3a19;box-shadow:inset 0 -35px 0 rgba(34,197,94,.18)}
+/* 動畫 */
+.fade-in {
+    animation: fadeIn .5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="header">
+  <div><h1>🚂 竹田頓物驛站 漫遊 App</h1><div class="subtitle">10 大主題 × AR 尋寶 × 在地體驗</div></div>
+  <div class="gps"><span class="dot"></span><span>定位：竹田驛園區</span></div>
+</header>
+<div class="progress"><span>探索進度</span><div class="track"><div class="fill" id="fill"></div></div><b id="progressText" style="color:var(--amber)">1 / 10</b></div>
+
+<main class="body">
+<!-- TAB 1 -->
+<section id="tab-ar" class="tab active" style="padding:0">
+  <div class="ar">
+    <video id="camStream" class="camera" autoplay playsinline muted style="object-fit:cover;width:100%;height:100%;display:none"></video>
+    <div class="camera" id="camFallback"></div><div class="grid"></div>
+    <div class="target"><span style="position:absolute;top:-24px;left:0;width:100%;font-size:.68rem;color:#cbd5e1">將鏡頭對準現場標示牌</span></div>
+    <div class="chips">
+      <div class="chip active" id="chip1" onclick="switchSpot(1)">👁️ 木造舊站</div>
+      <div class="chip" id="chip2" onclick="switchSpot(2)">👂 紅磚倉庫</div>
+      <div class="chip" id="chip3" onclick="switchSpot(3)">✋ 澡堂古井</div>
+      <div class="chip" id="chip4" onclick="switchSpot(4)">👅 釀造米倉</div>
+      <div class="chip" id="chip5" onclick="switchSpot(5)">👃 樟腦花園</div>
+      <div class="chip" id="chip6" onclick="switchSpot(6)">📸 攝影紀念館</div>
+      <div class="chip" id="chip7" onclick="switchSpot(7)">🚂 舊月台鐵道</div>
+      <div class="chip" id="chip8" onclick="switchSpot(8)">⚙️ 德興碾米機</div>
+    </div>
+    <div class="overlay" id="arOverlay"></div>
+    <div class="ar-bottom">
+      <div class="hint" id="arHint">請將手機對準【木造舊站售票口】古蹟木窗</div>
+      <button class="btn amber full" id="arBtn" onclick="triggerAR()">📷 啟動 AR 復古車票辨識</button>
+    </div>
+  </div>
+</section>
+
+<!-- TAB 2 -->
+<section id="tab-map" class="tab">
+  <div class="card">
+    <div class="title">🗺️ 旅遊 × 美食地圖</div>
+    <div class="map-toggle"><button id="travelBtn" class="on" onclick="mapMode('travel')">🗺️ 旅遊景點</button><button id="foodBtn" onclick="mapMode('food')">🍜 在地美食</button></div>
+    <div class="map" id="mapBox">📍 竹田驛園區<br>池上一郎博士文庫<br>李秀雲先生攝影紀念館</div>
+  </div>
+  <div class="card">
+    <div class="title"><span>🏃 跑步尋寶</span><span id="runKm" style="font-size:.7rem;color:#16a34a">0 / 6 組（0m）</span></div>
+    <p class="desc">每完成一組 500m 食物路線，就能收集一項竹田風味；完成 6 組共 3km 後，兌換醬油豆香冰淇淋 10 元優惠。</p>
+    <button class="btn green full" style="margin-top:9px" onclick="openRunningTask()">▶️ 開啟跑步尋寶遊戲</button>
+  </div>
+  <div class="card">
+    <div class="title">☕ 手沖咖啡 × AR 觀星</div><p class="desc">品嚐竹田文青咖啡，同時開啟夜間星空體驗。</p>
+    <button class="btn dark full" style="margin-top:8px" onclick="starChart()">🌌 開啟竹田夜間 AR 星盤</button>
+  </div>
+  <div class="card">
+    <div class="title">📍 三大驛站景點語音導覽</div>
+    <div style="display:grid;gap:8px">
+      <button class="btn" onclick="audio(1)">🔊 木造舊站售票口｜0:45</button>
+      <button class="btn" onclick="audio(2)">🔊 頓物紅磚倉庫｜1:10</button>
+      <button class="btn" onclick="audio(3)">🔊 原貨運服務所米倉｜0:55</button>
+    </div>
+  </div>
+</section>
+
+<!-- TAB 3 -->
+<section id="tab-experience" class="tab">
+  <div class="card">
+    <div class="title">📸 客語 × 閩南語照片任務</div>
+    <p class="desc">客語旁邊也有閩南語題目，從同一個地方詞彙聽見竹田多元的生活聲音。</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="photo"><div style="font-size:1.7rem">🏛️</div><b style="font-size:.72rem">客語題目</b><p style="font-size:.68rem;margin-top:4px">「火車站」客語如何發音？</p><div class="hakka"><button onclick="hakka(this,false)">Pung-yû</button><button onclick="hakka(this,true)">Fó-chha-chhâm</button></div></div>
+      <div class="photo"><div style="font-size:1.7rem">🗣️</div><b style="font-size:.72rem">閩南語題目</b><p style="font-size:.68rem;margin-top:4px">「火車站」閩南語如何說？</p><div class="hakka"><button onclick="minnanAnswer(this,false)">tshia̍h-páng</button><button onclick="minnanAnswer(this,true)">hué-chia-chām</button></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="title"><span>💌 竹田動態 AR 明信片</span><button class="btn amber" onclick="postcard()">生成</button></div>
+    <div class="postcard" id="postcard"><div class="poststamp">📮</div><div><b id="postTitle">竹田頓物驛站紀念卡</b><div style="font-size:.7rem">昭和風情與客家米倉漫遊中...</div></div></div>
+  </div>
+  <div class="card"><div class="title">📜 竹田歷史小故事｜按下翻牌</div><p class="desc">每張牌代表一個時代，按下即可翻面閱讀竹田的地方故事。</p><div class="history-grid">
+    <button class="history-card" onclick="flipHistory(this)"><span class="front"><b>1940 年代</b><small>舊鐵道啟程</small>🚂</span><span class="back"><b>鐵道時代</b><br>列車把人、米糧與消息帶進竹田，車站成為地方生活的集合點。</span></button>
+    <button class="history-card" onclick="flipHistory(this)"><span class="front"><b>1950 年代</b><small>米倉與貨運</small>🌾</span><span class="back"><b>頓物記憶</b><br>米倉忙著裝卸與轉運，居民用雙手累積竹田產業的日常。</span></button>
+    <button class="history-card" onclick="flipHistory(this)"><span class="front"><b>1980 年代</b><small>校園歌聲</small>🎵</span><span class="back"><b>青春時代</b><br>竹田孩子在校園唱著畢業歌，把家鄉風景寫進離校前的記憶。</span></button>
+    <button class="history-card" onclick="flipHistory(this)"><span class="front"><b>現在</b><small>驛站再相遇</small>📮</span><span class="back"><b>地方新故事</b><br>老照片、客語、閩南語與跨世代活動，讓竹田繼續寫下新的篇章。</span></button>
+  </div></div>
+</section>
+
+<!-- TAB 4 -->
+<section id="tab-special" class="tab">
+  <div class="card"><div class="title">🎭 池上一郎 VR 沉浸劇本</div><p class="desc">穿梭日治時期的竹田文庫，體驗沉浸式歷史 VR 劇場。</p><button class="btn full" style="margin-top:8px" onclick="vr()">📅 預約 VR 劇本體驗</button></div>
+  <div class="card"><div class="title">🎧 竹田共榮公園無聲派對</div><div class="audio"><div><b id="channel">頻道 A：客家 Chill 輕音樂</b><div style="font-size:.66rem;color:#94a3b8;margin-top:3px">戴上耳機，漫步共榮公園森林遊戲場</div></div><button class="btn amber" onclick="channel()">🔀 切換頻道</button><button class="btn green" onclick="joinSilentParty()">🎧 大型派對</button></div></div>
+  <div class="card"><div class="title">🌸 天使花園 MBTI 植物測驗</div><p class="desc">測出代表你的竹田熱帶蘭花與個性植物。</p><button class="btn red full" style="margin-top:8px" onclick="mbti()">✨ 開始 30 秒測驗</button></div>
+  <div class="card" style="background:linear-gradient(135deg,#fff7ed,#eff6ff)"><div class="title">🧓🧒 青齡專區</div><p class="desc" style="line-height:1.7">銀髮組與小孩舞台，讓不同世代一起上台、一起聽歌、一起完成任務。特別收錄：竹田國中畢業歌，可獨立播放並閱讀歌曲故事。</p><button class="btn green full" style="margin-top:8px" onclick="openQinglingZone()">🎤 進入青齡舞台</button></div>
+  <div class="card" style="background:#f0fdf4;border-color:#86efac"><div class="title">👍 高齡職人挑戰專區</div><p class="desc" style="line-height:1.7"><b>不限年齡皆可參加</b><br>完成職人挑戰即可完成本項任務。</p><button class="btn green full" style="margin-top:9px" onclick="openCraftChallenge()">👍 開始職人挑戰</button></div>
+  <div class="card"><div class="title">🎬 竹田台日電影專區</div><p class="desc">一起決定竹田下一部紀錄片怎麼拍，也別錯過驛園草地露天電影院活動訊息：敬請期待。</p><div class="stamps">
+    <div class="stamp" onclick="openDocumentaryWatch()" style="cursor:pointer"><div style="font-size:1.5rem">🎞️</div><b style="font-size:.68rem">竹田紀錄片觀賞<br><span style="font-size:.58rem">點擊觀看</span></b></div>
+    <div class="stamp locked" id="stamp2" onclick="openJapanRailwayStory()" style="cursor:pointer"><div style="font-size:1.5rem">🇯🇵</div><b style="font-size:.68rem">日本鐵道電影<br><span style="font-size:.58rem">點擊看故事</span></b></div>
+    <div class="stamp locked" id="stamp3" onclick="openCoCreateFilm()" style="cursor:pointer"><div style="font-size:1.5rem">🎬</div><b style="font-size:.68rem">共創竹田微電影<br><span style="font-size:.58rem">點擊決定下一部</span></b></div>
+  </div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn green" style="flex:1" onclick="openFilmZone()">🎥 決定紀錄片</button><button class="btn amber" style="flex:1" onclick="openOutdoorCinema()">🌙 露天電影公告</button></div></div>
+</section>
+
+<!-- TAB 5 -->
+<section id="tab-wallet" class="tab">
+  <div class="card"><div class="title">🏅 我的 10 大任務集章｜拼圖集滿看見竹田驛站</div><div id="walletStamps"></div></div>
+  <div class="card"><div class="title">🎁 我的體驗與優惠券 Wallet</div><div class="coupon"><div><h4>AR 醬香任務｜豆油伯醬油禮盒優惠</h4><p>完成「AR 探索」分頁中任一項感官任務後可出示 QR 核銷<br>✦ 醬油禮盒限定優惠</p></div><button class="btn amber" onclick="openQR()">出示</button></div></div>
+  <div class="card"><div class="title">📊 探索成果</div><p class="desc" id="summary">已解鎖 1 / 10 項主題任務。</p><button class="btn green full" style="margin-top:8px" onclick="completeAll()">展示完整體驗（Demo）</button></div>
+</section>
+</main>
+<!-- ======================================
+     竹田車站｜8 大互動任務
+====================================== -->
+
+<section id="tab-tasks8" class="tab">
+
+    <div class="card">
+        <div class="title">
+            🚉 竹田車站 8 大探索任務
+            <span style="font-size:.68rem;color:#16a34a;" id="task8Counter">
+                0 / 8
+            </span>
+        </div>
+
+        <p class="desc">
+            從車站出發，跑一段路、認識一個地方、
+            留下一張明信片，最後把竹田的記憶寄給未來。
+        </p>
+    </div>
+
+
+    <div class="task8-grid">
+
+        <!-- 1 -->
+        <div class="task8-card" id="task8-card-1" onclick="openTask8(1)">
+            <div class="task8-icon">🏃</div>
+            <div class="task8-info">
+                <b>竹田車站跑步尋寶</b>
+                <p>沿著竹田常見跑步路線，完成 6 個收集點。</p>
+            </div>
+            <div class="task8-arrow" id="task8-arrow-1">開始 ›</div>
+        </div>
+
+
+        <!-- 2 -->
+        <div class="task8-card" id="task8-card-2" onclick="openTask8(2)">
+            <div class="task8-icon">🗺️</div>
+            <div class="task8-info">
+                <b>竹田旅遊探索地圖</b>
+                <p>點擊景點，閱讀竹田的地方故事與介紹。</p>
+            </div>
+            <div class="task8-arrow" id="task8-arrow-2">探索 ›</div>
+        </div>
+
+
+        <!-- 3 -->
+        <div class="task8-card" id="task8-card-3" onclick="openTask8(3)">
+            <div class="task8-icon">💌</div>
+            <div class="task8-info">
+                <b>AR 動態明信片</b>
+                <p>輸入一句話，生成專屬竹田旅行文案與動畫。</p>
+            </div>
+            <div class="task8-arrow" id="task8-arrow-3">生成 ›</div>
+        </div>
+
+
+        <!-- 4 -->
+        <div class="task8-card" id="task8-card-4" onclick="openTask8(4)">
+            <div class="task8-icon">🌸</div>
+            <div class="task8-info">
+                <b>天使花園花束測驗</b>
+                <p>完成測驗，生成你的星座專屬花束與優惠券。</p>
+            </div>
+            <div class="task8-arrow" id="task8-arrow-4">測驗 ›</div>
+        </div>
+
+
+        <!-- 5 -->
+        <div class="task8-card" id="task8-card-5" onclick="openTask8(5)">
+            <div class="task8-icon">🎟️</div>
+            <div class="task8-info">
+                <b>竹田鐵道掃描集章</b>
+                <p>掃描指定 QR Code，自動收集復古鐵道印章。</p>
+            </div>
+            <div class="task8-arrow" id="task8-arrow-5">掃描 ›</div>
+        </div>
+
+
+        <!-- 6 -->
+        <div class="task8-card" id="task8-card-6" onclick="openTask8(6)">
+            <div class="task8-icon">🎧</div>
+            <div class="task8-info">
+                <b>客庄聲音探索</b>
+                <p>聽客語與地方故事，完成聲音互動任務。</p>
+            </div>
+            <div class="task8-arrow" id="task8-arrow-6">聆聽 ›</div>
+        </div>
+
+
+        <!-- 7 -->
+        <div class="task8-card" id="task8-card-7" onclick="openTask8(7)">
+            <div class="task8-icon">🚂</div>
+            <div class="task8-info">
+                <b>竹田鐵道記憶展示</b>
+                <p>掃描展示物，看老照片、車票與鐵道故事。</p>
+            </div>
+            <div class="task8-arrow" id="task8-arrow-7">查看 ›</div>
+        </div>
+
+
+        <!-- 8 -->
+        <div class="task8-card" id="task8-card-8" onclick="openTask8(8)">
+            <div class="task8-icon">📮</div>
+            <div class="task8-info">
+                <b>竹田時光郵件</b>
+                <p>寫一封信給未來的自己，寄出專屬竹田記憶。</p>
+            </div>
+            <div class="task8-arrow" id="task8-arrow-8">寄信 ›</div>
+        </div>
+
+    </div>
+
+</section>
+<nav class="nav">
+  <div class="navitem active" id="nav-ar" onclick="tab('ar')"><span class="navicon">📷</span>AR 探索</div>
+  <div class="navitem" id="nav-map" onclick="tab('map')"><span class="navicon">🗺️</span>地圖尋寶</div>
+  <div class="navitem" id="nav-experience" onclick="tab('experience')"><span class="navicon">📸</span>文化任務</div>
+  <div class="navitem" id="nav-special" onclick="tab('special')"><span class="navicon">🎭</span>特色體驗</div>
+  <div class="navitem" id="nav-wallet" onclick="tab('wallet')"><span class="navicon">🎒</span>集章錢包</div>
+  <div class="navitem" id="nav-tasks8" onclick="tab('tasks8')"><span class="navicon">🚉</span>8大任務</div>
+</nav>
+</div>
+
+<div class="modal" id="modal"><div class="modalbox" id="modalBox"></div></div>
+
+<script>
+let progress=1,currentSpot=1,runKm=0,channelIndex=0,riceScore=0,arGiftUnlocked=false;
+/* 輕量提示條，取代原本會中斷操作的 toast() */
+function toast(msg){
+    let t=document.getElementById('toastBox');
+    if(!t){
+        t=document.createElement('div');
+        t.id='toastBox';
+        t.style.cssText='position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:rgba(15,23,42,.96);color:#fff;padding:11px 16px;border-radius:12px;font-size:.76rem;max-width:88%;text-align:center;z-index:300;box-shadow:0 10px 24px rgba(0,0,0,.35);white-space:pre-line;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;line-height:1.5';
+        document.body.appendChild(t);
+    }
+    t.textContent=msg;
+    t.style.opacity='1';
+    t.style.transform='translateX(-50%) translateY(0)';
+    clearTimeout(t._timer);
+    t._timer=setTimeout(()=>{t.style.opacity='0';},2400);
+}
+const channels=["頻道 A：客家 Chill 輕音樂","頻道 B：竹田老街歷史聲音劇場","頻道 C：童年共榮公園夜間蟲鳴","頻道 D：偶像劇風《竹田站前心動》","大型派對：全場同步聆聽模式"];
+const missions=["昭和舊站","客語任務","AR 明信片","旅遊美食地圖","跑步尋寶","AR 觀星","歷史照片","VR 劇本","無聲派對","MBTI × 鐵道集章"];
+function tab(name){
+ document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+ document.querySelectorAll(".navitem").forEach(x=>x.classList.remove("active"));
+ document.getElementById("tab-"+name).classList.add("active");
+ document.getElementById("nav-"+name).classList.add("active");
+}
+function unlock(n){
+ if(n>progress){progress=n;document.getElementById("fill").style.width=(progress*10)+"%";document.getElementById("progressText").textContent=progress+" / 10";document.getElementById("summary").textContent=`已解鎖 ${progress} / 10 項主題任務。`;renderWallet();}
+}
+function renderWallet(){
+ const box=document.getElementById("walletStamps");if(!box)return;box.innerHTML="";
+ const grid=document.createElement("div");grid.className="puzzle-grid";
+ missions.forEach((m,i)=>{const d=document.createElement("div");d.className="puzzle-piece"+(i<progress?" done":"");d.innerHTML=i<progress?`<span>${["🚂","🗣️","💌","🗺️","🏃","🌌","📜","🎭","🎧","🌸"][i]}<br>${i+1}. ${m}</span>`:`<span>第 ${i+1} 片<br>待解鎖</span>`;grid.appendChild(d)});
+ box.appendChild(grid);
+ if(progress>=10){const scene=document.createElement("div");scene.className="station-scene";scene.innerHTML=`<div style="font-size:4rem">🚉</div><h3>竹田驛站</h3><p style="font-size:.74rem;margin-top:5px">10 大任務拼圖完成！竹田驛站的完整畫面已解鎖。</p><div style="font-size:2rem;margin-top:8px">🚂🌳📮</div>`;box.appendChild(scene)}
+}
+const arData = {
+  1:{sense:"視覺",hint:"【視覺任務】請將手機對準【木造舊站售票口】古蹟木窗",btn:"📷 啟動 AR 檜木車票辨識",task:"解鎖昔日車票圖騰與日式木造結構細節"},
+  2:{sense:"聽覺",hint:"【聽覺任務】請將手機對準【紅磚倉庫】牆面標示",btn:"🎵 啟動 AR 鐵道聲景重現",task:"聆聽火車過站汽笛聲與池上一郎文庫黑膠音樂"},
+  3:{sense:"觸覺",hint:"【觸覺任務】請將手機對準【舊澡堂古井】幫浦",btn:"💧 啟動 AR 壓水震動體感",task:"點擊螢幕壓水，觸發擬真水流與震動反饋"},
+  4:{sense:"提醒",hint:"【場域提醒】請留意【釀造米倉】入口看板與開放時間",btn:"🌾 查看釀造米倉提醒",task:"釀造米倉為導覽提醒區，請依現場指示參觀，不列入互動任務"},
+  5:{sense:"嗅覺",hint:"【嗅覺任務】請將手機對準【樟腦花園】植物解說牌",btn:"🌸 啟動 AR 芳香粒子捕捉",task:"掃描客家盤花與樟腦樹，捕捉氣味分子卡牌"},
+  6:{sense:"人文",hint:"【記憶任務】請將手機對準【李秀雲攝影館】展櫃老照片",btn:"🎞️ 啟動 AR 老照片時空疊影",task:"重現 50 年代客家農村生活視覺疊影與故事說明"},
+  7:{sense:"地景",hint:"【鐵道任務】請將手機對準【舊月台】鐵軌標示",btn:"🚂 啟動 AR 蒸汽火車進站",task:"模擬蒸汽火車鳴笛進站，提供虛擬合影拍照功能"},
+  8:{sense:"工藝",hint:"【機械任務】請將手機對準【德興米廠】碾米機解說牌",btn:"⚙️ 啟動 AR 碾米機動態拆解",task:"透視木造碾米機內部齒輪與稻穀去殼運作原理"}
+};
+function switchSpot(n){
+ currentSpot=n;document.querySelectorAll(".chip").forEach(x=>x.classList.remove("active"));document.getElementById("chip"+n).classList.add("active");document.getElementById("arOverlay").innerHTML="";
+ const spot=arData[n];document.getElementById("arHint").textContent=spot.hint;document.getElementById("arBtn").textContent=spot.btn;
+}
+function triggerAR(){
+ const o=document.getElementById("arOverlay");
+ if(currentSpot===1)o.innerHTML=`<div class="ticket"><div style="font-size:.7rem;letter-spacing:2px">臺灣總督府鐵道部 復古車票</div><div style="font-size:2rem">🚂💨</div><h3>頓物（竹田） ➜ 屏東</h3><p style="font-size:.72rem">昭和風格紀念車票 AR 收藏</p><button class="btn green" style="margin-top:10px" onclick="claimAR(1)">📥 收集舊車票紀念章</button></div>`;
+ else if(currentSpot===2)o.innerHTML=`<div class="puzzle"><h3>🗣️ 屏東客家景點：讀音 vs 客家</h3><p style="font-size:.78rem;line-height:1.6">聽見景點名稱的讀音，選出正確的客家說法。竹田、六堆與屏東客庄的地名，都藏著生活記憶。</p><div class="options"><button class="opt" onclick="answer(true)">A. 「竹田」客語讀音：Zug-tshân</button><button class="opt" onclick="answer(false)">B. 「竹田」讀作臺北腔普通話</button><button class="opt" onclick="answer(false)">C. 客家景點只看文字、不聽讀音</button></div><div style="margin-top:10px;background:#fff7ed;border-radius:10px;padding:9px;font-size:.7rem;color:#7c2d12">📍 延伸景點：竹田驛園、六堆客家文化園區、萬巒客庄、內埔老街</div></div>`;
+ else if(currentSpot===3){riceScore=0;o.innerHTML=`<div class="mini"><h3>🌾 搬運米袋裝載遊戲</h3><p style="font-size:.72rem">快速點擊 3 個米袋完成裝載！</p><div class="bags"><div class="bag" onclick="bag(this)">🌾</div><div class="bag" onclick="bag(this)">📦</div><div class="bag" onclick="bag(this)">🌾</div></div><div style="font-size:.76rem;color:#4ade80">已成功搬運：<span id="score">0</span> / 3 袋</div></div>`}
+ else if(currentSpot===4){ o.innerHTML=`<div class="mini"><div style="font-size:2rem">🌾</div><b style="color:#f59e0b">釀造米倉參觀提醒</b><p style="font-size:.75rem;margin-top:5px">${arData[currentSpot].task}</p><p style="font-size:.7rem;color:#cbd5e1;margin-top:7px">請依現場動線與開放時間參觀，這一站不列入任務計分。</p></div>`; } else { arGiftUnlocked=true; toast(`[${arData[currentSpot].sense}任務啟動]\n${arData[currentSpot].task}\n\n完成 AR 任務後可至集章錢包查看醬油禮盒優惠。`); unlock(Math.min(currentSpot,10)); }
+}
+function claimAR(n){arGiftUnlocked=true;unlock(n===1?1:2);document.getElementById("arOverlay").innerHTML=`<div class="mini"><div style="font-size:2rem">🎉</div><b style="color:#4ade80">印章解鎖成功！</b><p style="font-size:.75rem;margin-top:5px">已收錄至你的數位集章冊。</p></div>`}
+function answer(ok){if(ok){unlock(2);claimAR(2)}else toast("答錯囉！提示：竹田舊時為米糧與貨物堆積轉運之地。")}
+function bag(el){if(el.style.pointerEvents==="none")return;el.style.pointerEvents="none";el.style.opacity=".3";riceScore++;document.getElementById("score").textContent=riceScore;if(riceScore===3){unlock(3);setTimeout(()=>claimAR(3),300)}}
+function minnanAnswer(btn,ok){if(ok){btn.classList.add("correct");toast("解答正確！hué-chia-chām 是閩南語的火車站。");unlock(2)}else toast("再試一次！提示：閩南語的火車站是 hué-chia-chām。")}
+function flipHistory(card){card.classList.toggle("flipped");}
+
+function hakka(btn,ok){if(ok){btn.classList.add("correct");toast("解答正確！Fó-chha-chhâm 即為客語的火車站。");unlock(2)}else toast("再試一次！提示：找帶有「火車站」發音的選項。")}
+function postcard(){openPostcard();}
+const mapItems = {
+ travel:[
+  ["竹田車站","🚉","竹田旅程起點，保留木造車站與慢車進站的地方記憶。"],
+  ["竹田驛園","📍","適合散步、親子遊戲與戶外活動的綠意場域。"],
+  ["池上一郎博士文庫","📚","從藏書、文物與地方故事認識竹田的人文風景。"],
+  ["李秀雲先生攝影紀念館","📷","透過老照片看見竹田農村、家庭與街區的時代變化。"],
+  ["頓物紅磚倉庫","🧱","紅磚建築見證鐵道運輸、米糧集散與地方產業歷史。"],
+  ["原貨運服務所米倉","🌾","了解米袋裝卸與竹田作為物資轉運地的生活軌跡。"],
+  ["六堆客家文化園區","🏡","探索六堆客家聚落、語言、信仰與日常工藝。"],
+  ["共榮公園","🌳","適合無聲派對、親子遊戲與跨世代休憩的公共空間。"],
+  ["竹田老街","🚶","沿著老街尋找店家招牌、地方口音與生活風景。"]
+ ],
+ food:[
+  ["竹田客家粄條","🍜","滑順粄條搭配高湯與在地配料，是竹田旅程的暖胃起點。"],
+  ["豆油伯醬油冰淇淋","🍨","鹹甜交織的在地創意風味，完成美食奪點可兌換 10 元券。"],
+  ["大漢鹹油條","🥖","外酥內香的早餐記憶，適合搭配豆漿或地方茶飲。"],
+  ["醬油豆香小點","🫙","以醬香與豆香為靈感設計的竹田限定小點。"],
+  ["客家米食拼盤","🍚","集合粢粑、米糕等米食風味，感受客庄的米食文化。"],
+  ["職人果乾","🍎","由地方職人製作的季節果乾，適合放入野餐套組。"],
+  ["養生茶包","🍵","以溫和茶香陪伴旅途，適合長輩與全家共享。"],
+  ["美味麵包","🍞","活動限定的手作麵包，數量有限，送完為止。"],
+  ["竹田在地甜點","🍡","以地方食材發想的季節甜點，適合親子一起品嘗。"]
+ ]
+};
+function renderMapItems(mode){
+ const b=document.getElementById("mapBox");
+ b.innerHTML=`<div style="display:grid;gap:7px;width:100%">${mapItems[mode].map((item,i)=>`<button class="place-btn" onclick="placeInfo('${item[0]}')"><b>${item[1]} ${i+1}. ${item[0]}</b><span>點擊查看介紹</span></button>`).join("")}</div>`;
+}
+function mapMode(mode){let t=document.getElementById("travelBtn"),f=document.getElementById("foodBtn");if(mode==="travel"){t.classList.add("on");f.classList.remove("on");document.getElementById("mapBox").style.background="#e0f2fe"}else{f.classList.add("on");t.classList.remove("on");document.getElementById("mapBox").style.background="#fef3c7"}renderMapItems(mode);unlock(4)}
+function run(){runKm+=.8;document.getElementById("runKm").textContent=runKm.toFixed(1)+" km";toast(`已記錄竹田探索路線 ${runKm.toFixed(1)} km！`)}
+function scanQR(){if(runKm>=.8){unlock(5);document.getElementById("stamp2").classList.remove("locked");toast("成功掃描 Checkpoint QR！獲得豆油伯醬油兌換券。")}else toast("請先累積至少 0.8 km 再掃描 Checkpoint。")}
+function starChart(){modal(`<h3>☕ 竹田手沖咖啡 × 星盤觀星</h3><div style="background:#0f172a;color:#f59e0b;padding:15px;border-radius:12px;margin:12px 0;text-align:left"><b>✨ 竹田今夜星空指標</b><p style="font-size:.75rem;color:#cbd5e1;margin-top:6px">推薦搭配：頓物深焙手沖<br>體驗：開啟夜間 AR 觀星羅盤</p></div><button class="btn dark full" onclick="closeModal()">開啟 AR 觀星羅盤</button>`);unlock(6)}
+function audio(n){toast(`🔊 正在播放景點 ${n} 語音導覽...`)}
+function vr(){modal(`<h3>🎭 池上一郎 VR 劇本預約</h3><p class="desc" style="margin:8px 0">選擇體驗時段（Demo）</p><div style="text-align:left;font-size:.8rem;display:grid;gap:8px"><label><input type="radio" checked name="vr"> 14:00－14:30【昭和文庫謎案】</label><label><input type="radio" name="vr"> 15:30－16:00【竹田驛情緣】</label></div><button class="btn green full" style="margin-top:12px" onclick="confirmVR()">確認預約</button>`)}
+function confirmVR(){closeModal();unlock(8);toast("VR 體驗預約成功！票券已加入數位錢包。")}
+function channel(){channelIndex=(channelIndex+1)%channels.length;document.getElementById("channel").textContent=channels[channelIndex];unlock(9)}
+function joinSilentParty(){modal(`<h3>🎧 竹田共榮公園大型無聲派對</h3><p class="desc">所有參加者戴上耳機後，可同步聽見同一個頻道；現場不必擴音，也能一起跳舞、散步與互動。</p><div class="audio" style="margin:12px 0"><div><b>偶像劇風：竹田站前心動</b><div style="font-size:.66rem;color:#94a3b8;margin-top:4px">「列車進站的那一刻，我終於遇見你。」</div></div><span style="font-size:1.5rem">🎬</span></div><button class="btn green full" onclick="channel();closeModal()">加入同步聆聽</button>`);unlock(9)}
+function mbti(){modal(`<h3>🌸 天使花園 MBTI 植物測驗</h3><p style="font-size:.8rem;margin:10px 0">完成小測驗後，看看最適合你的竹田植物性格。</p><button class="btn full" style="margin-bottom:7px" onclick="result('ENFJ')">A. 喜歡照顧大家、讓旅程更熱鬧</button><button class="btn full" onclick="result('ENFJ')">B. 喜歡分享美食與花藝記憶</button>`)}
+function result(type){document.getElementById("stamp3").classList.remove("locked");unlock(10);modal(`<h3>🌸 你的竹田植物性格</h3><div class="bouquet"><div class="bouquet-icon">💙🌺</div><h2 style="color:#1d4ed8">${type}｜藍色蘭花</h2><p style="font-size:.78rem;margin-top:8px;line-height:1.6">你是溫暖、善於連結大家的 ENFJ，適合藍色蘭花的共好與陪伴精神。</p></div><div style="background:#dbeafe;border-radius:10px;padding:11px;margin-top:10px;font-size:.74rem;color:#1e3a8a">🎁 已解鎖：藍色蘭花手作 9 折優惠</div><button class="btn green full" style="margin-top:10px" onclick="closeModal()">收藏結果</button>`)}
+function modal(html){document.getElementById("modalBox").innerHTML=html;document.getElementById("modal").classList.add("show")}
+function closeModal(){document.getElementById("modal").classList.remove("show")}
+function openQR(){if(!arGiftUnlocked){toast("請先在「AR 探索」分頁完成任一項感官任務，才能解鎖醬油禮盒優惠。");return;} modal(`<h3 style="color:var(--wood-dark)">豆油伯醬油禮盒優惠</h3><p class="desc">完成 AR 醬香任務後解鎖，請將此畫面出示給門市人員核銷</p><div style="width:170px;height:170px;margin:15px auto;border:2px solid #e2e8f0;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:3rem">📱</div><b style="font-size:.75rem;color:#059669">✓ Demo 優惠券有效</b><br><button class="close" onclick="closeModal()">關閉</button>`)}
+function completeAll(){progress=10;document.getElementById("fill").style.width="100%";document.getElementById("progressText").textContent="10 / 10";renderWallet();document.getElementById("summary").innerHTML="已完成 10 大主題探索！<br><b style=\"color:#b45309\">🎉 拼圖完成，竹田驛站已解鎖！</b>";modal(`<div class="fade-in"><h3>🧩 10 大任務拼圖完成</h3><p class="desc">最後一片拼圖已放回正確位置，竹田驛站完整畫面出現了。</p><div class="puzzle-grid">${missions.map((m,i)=>`<div class="puzzle-piece done"><span>${["🚂","🗣️","💌","🗺️","🏃","🌌","📜","🎭","🎧","🌸"][i]}<br>${i+1}</span></div>`).join("")}</div><div class="station-scene"><div style="font-size:5rem">🚉</div><h2>竹田驛站</h2><p style="font-size:.76rem;margin-top:6px">鐵道、地方故事與旅人的記憶，在此拼成完整的一站。</p><div style="font-size:2rem;margin-top:8px">🚂🌳📮</div></div><button class="btn green full" style="margin-top:12px" onclick="closeModal()">收藏完成畫面</button></div>`)}
+renderWallet();
+renderMapItems("travel");
+
+/* 嘗試開啟實機後鏡頭作為 AR 背景，取得授權失敗則保留原本的模擬漸層畫面 */
+async function initCamera(){
+    const video=document.getElementById("camStream");
+    const fallback=document.getElementById("camFallback");
+    if(!video||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){return;}
+    try{
+        const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});
+        video.srcObject=stream;
+        video.style.display="block";
+        if(fallback) fallback.style.display="none";
+    }catch(e){
+        video.style.display="none";
+        if(fallback) fallback.style.display="block";
+    }
+}
+initCamera();
+
+/* ======================================
+   竹田車站｜8 大互動任務 JS
+====================================== */
+
+let task8Completed = [];
+
+function openTask8(task) {
+
+    if (task === 1) {
+
+        openRunningTask();
+
+    } else if (task === 2) {
+
+        openTravelMap();
+
+    } else if (task === 3) {
+
+        openPostcard();
+
+    } else if (task === 4) {
+
+        openFlowerTest();
+
+    } else if (task === 5) {
+
+        openStampScanner();
+
+    } else if (task === 6) {
+
+        openSoundTask();
+
+    } else if (task === 7) {
+
+        openRailwayMemory();
+
+    } else if (task === 8) {
+
+        openTimeMail();
+    }
+}
+
+
+/* ======================================
+   1. 跑步尋寶
+====================================== */
+
+let runPoints = {
+    A:false,
+    B:false,
+    C:false,
+    D:false,
+    E:false,
+    F:false
+};
+
+function openRunningTask() {
+    currentRunIndex = 0;
+    runPoints = {A:false,B:false,C:false,D:false,E:false,F:false};
+    modal(`
+      <div class="fade-in">
+        <div style="font-size:3.2rem">🏃</div>
+        <h2 style="color:#5c3a19;margin:8px 0">竹田六點跑步尋寶</h2>
+        <p class="desc" style="margin:8px 0 14px">每組 500m、共 6 組食物路線；完成 3km 後可兌換醬油豆香冰淇淋優惠。</p>
+        <div class="card" style="text-align:left;background:#f0fdf4;border-color:#bbf7d0">
+          <b style="color:#166534">遊戲規則</b>
+          <p class="desc" style="margin-top:5px">依序抵達 A 至 F 六個跑點。每次按下「抵達下一個跑點」即可模擬完成一站；完成第六站後，按下兌換按鈕取得 QR Code。</p>
+        </div>
+        <button class="btn green full" style="margin-top:14px" onclick="startRunGame()">▶️ 開始遊戲，前往跑點頁面</button>
+      </div>
+    `);
+}
+
+function startRunGame() {
+    modal(`
+      <div class="fade-in">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <h3>🏃 跑步尋寶進行中</h3>
+          <b id="runProgress" style="font-size:.72rem;color:#16a34a">0 / 6 組｜0m</b>
+        </div>
+        <p class="desc" style="margin:6px 0 10px">每完成 500m 即收集一項食物，依序完成六組共 3km。</p>
+        <div class="run-route">
+          <div class="route-line"></div>
+          <div class="route-point" id="pointA"><div class="route-dot">A</div><div><b>第 1 組｜客家粄條</b><span>500m 食物收集 → 🍜</span></div></div>
+          <div class="route-point" id="pointB"><div class="route-dot">B</div><div><b>第 2 組｜鹹油條</b><span>1000m 食物收集 → 🥖</span></div></div>
+          <div class="route-point" id="pointC"><div class="route-dot">C</div><div><b>第 3 組｜豆油伯醬油</b><span>1500m 食物收集 → 🫙</span></div></div>
+          <div class="route-point" id="pointD"><div class="route-dot">D</div><div><b>第 4 組｜醬油豆香冰淇淋</b><span>2000m 食物收集 → 🍨</span></div></div>
+          <div class="route-point" id="pointE"><div class="route-dot">E</div><div><b>第 5 組｜客家米食</b><span>2500m 食物收集 → 🍚</span></div></div>
+          <div class="route-point" id="pointF"><div class="route-dot">F</div><div><b>第 6 組｜竹田在地甜點</b><span>3000m 完成全套美食 → 🍡</span></div></div>
+        </div>
+        <div class="collect-items">
+          <div class="collect-item" id="collectBean">🍜</div>
+          <div class="collect-item" id="collectCone">🥖</div>
+          <div class="collect-item" id="collectSauce">🫙</div>
+        </div>
+        <button class="btn green full" id="nextRunPointBtn" onclick="simulateRunPoint()">📍 抵達下一個跑步點</button>
+      </div>
+    `);
+}
+
+let currentRunIndex = 0;
+
+function simulateRunPoint() {
+
+    const points = ["A","B","C","D","E","F"];
+
+    if (currentRunIndex >= points.length) {
+
+        toast("🎉 已完成全部跑步任務！");
+        return;
+    }
+
+    const p = points[currentRunIndex];
+
+    runPoints[p] = true;
+    const completedMeters = (currentRunIndex + 1) * 500;
+    runKm = completedMeters / 1000;
+    const runKmLabel = document.getElementById("runKm");
+    if (runKmLabel) runKmLabel.textContent = `${currentRunIndex + 1} / 6 組（${completedMeters}m）`;
+
+    const point = document.getElementById("point" + p);
+
+    if (point) {
+        point.classList.add("done");
+        point.querySelector(".route-dot").innerHTML = "✓";
+    }
+
+    if (p === "A") {
+        document.getElementById("collectBean")
+            .classList.add("collected");
+
+        toast("🍜 第 1 組完成！\n收集：客家粄條");
+
+    } else if (p === "B") {
+
+        document.getElementById("collectCone")
+            .classList.add("collected");
+
+        toast("🥖 第 2 組完成！\n收集：竹田鹹油條");
+
+    } else if (p === "C") {
+
+        document.getElementById("collectSauce")
+            .classList.add("collected");
+
+        toast("🫙 第 3 組完成！\n收集：豆油伯醬油");
+
+    } else if (p === "D") {
+
+        toast("🍨 第 4 組完成！\n收集：醬油豆香冰淇淋風味");
+
+    } else if (p === "E") {
+
+        toast("🍚 第 5 組完成！\n收集：竹田客家米食");
+
+    } else if (p === "F") {
+
+        completeTask8(1);
+
+        modal(`
+
+            <div class="fade-in">
+
+                <div style="font-size:4rem;">
+                    🍨
+                </div>
+
+                <h2 style="color:#5c3a19;">
+                    醬油豆香冰淇淋
+                </h2>
+
+                <p class="desc" style="margin:10px 0;">
+                    恭喜你完成竹田美食奪點！太熱了，給你 10 元醬油冰淇淋券。
+                </p>
+
+                <div class="collect-items">
+
+                    <div class="collect-item collected">🍜</div>
+                    <div class="collect-item collected">🥖</div>
+                    <div class="collect-item collected">🫙</div>
+                    <div class="collect-item collected">🍨</div>
+                    <div class="collect-item collected">🍚</div>
+                    <div class="collect-item collected">🍡</div>
+
+                </div>
+
+                <button
+                    class="btn amber full"
+                    onclick="showIceCreamCoupon()">
+
+                    🍦 領取 10 元醬油冰淇淋券
+
+                </button>
+
+            </div>
+
+        `);
+    }
+
+    currentRunIndex++;
+}
+
+
+function showIceCreamCoupon() {
+    unlock(5);
+    const qrPayload = "竹田驛站｜醬油豆香冰淇淋｜折價10元｜跑步尋寶完成禮";
+    const qrUrl = "https://quickchart.io/qr?text=" + encodeURIComponent(qrPayload) + "&size=220&margin=2";
+    modal(`
+      <div class="fade-in">
+        <div style="font-size:3rem">🍨</div>
+        <h2 style="color:#5c3a19;margin:7px 0">10 元醬油冰淇淋券</h2>
+        <p class="desc" style="margin:8px 0">恭喜你完成竹田美食奪點！太熱了，這張券可折抵醬油冰淇淋 10 元，請於兌換時出示。</p>
+        <div style="background:#fff;padding:12px;border-radius:14px;border:1px solid #e2e8f0;margin:12px auto;width:220px">
+          <img src="${qrUrl}" alt="醬油豆香冰淇淋 10 元優惠 QR Code" style="display:block;width:190px;height:190px;margin:auto" />
+        </div>
+        <p style="font-size:.68rem;color:#64748b">優惠內容：醬油冰淇淋折價 10 元｜限量使用一次</p>
+        <button class="btn green full" style="margin-top:11px" onclick="closeModal()">完成，返回探索頁</button>
+      </div>
+    `);
+}
+
+/* ======================================
+   2. 旅遊探索地圖
+====================================== */
+
+function openTravelMap() {
+
+    modal(`
+
+        <div class="fade-in">
+
+            <h3>🗺️ 竹田旅遊探索地圖</h3>
+
+            <p class="desc" style="margin:7px 0 12px;">
+                點擊景點，探索竹田的地方故事。
+            </p>
+
+            <div class="place-list">
+
+                <button class="place-btn"
+                    onclick="placeInfo('竹田車站')">
+
+                    <b>🚉 竹田車站</b>
+                    <span>竹田旅程的起點</span>
+
+                </button>
+
+                <button class="place-btn"
+                    onclick="placeInfo('池上一郎博士文庫')">
+
+                    <b>📚 池上一郎博士文庫</b>
+                    <span>閱讀竹田的人文記憶</span>
+
+                </button>
+
+                <button class="place-btn"
+                    onclick="placeInfo('李秀雲先生攝影紀念館')">
+
+                    <b>📷 李秀雲先生攝影紀念館</b>
+                    <span>透過影像認識地方歲月</span>
+
+                </button>
+
+                <button class="place-btn"
+                    onclick="placeInfo('天使花園')">
+
+                    <b>🌸 天使花園</b>
+                    <span>花卉、星座與專屬花束體驗</span>
+
+                </button>
+
+                <button class="place-btn"
+                    onclick="placeInfo('頓物紅磚倉庫')">
+
+                    <b>🧱 頓物紅磚倉庫</b>
+                    <span>感受竹田的產業記憶</span>
+
+                </button>
+
+            </div>
+
+        </div>
+
+    `);
+
+    completeTask8(2);
+}
+
+
+function placeInfo(name) {
+
+    const descriptions = {
+
+        "竹田車站":
+            "竹田車站是探索地方故事的起點，從鐵道出發認識竹田。",
+
+        "池上一郎博士文庫":
+            "透過書籍與文物，認識竹田的人文歷史與地方文化。",
+
+        "李秀雲先生攝影紀念館":
+            "用攝影保存地方記憶，看看過去與現在的竹田。",
+
+        "天使花園":
+            "從花卉、星座與性格測驗，找到屬於你的竹田花束。",
+
+        "頓物紅磚倉庫":"紅磚建築見證竹田過去的產業與物資運輸記憶。",
+        "竹田驛園":"適合散步、親子遊戲與戶外活動的綠意場域。",
+        "原貨運服務所米倉":"了解米袋裝卸與竹田作為物資轉運地的生活軌跡。",
+        "六堆客家文化園區":"探索六堆客家聚落、語言、信仰與日常工藝。",
+        "共榮公園":"適合無聲派對、親子遊戲與跨世代休憩的公共空間。",
+        "竹田老街":"沿著老街尋找店家招牌、地方口音與生活風景。",
+        "竹田客家粄條":"滑順粄條搭配高湯與在地配料，是竹田旅程的暖胃起點。",
+        "豆油伯醬油冰淇淋":"鹹甜交織的在地創意風味，完成美食奪點可兌換 10 元券。",
+        "大漢鹹油條":"外酥內香的早餐記憶，適合搭配豆漿或地方茶飲。",
+        "醬油豆香小點":"以醬香與豆香為靈感設計的竹田限定小點。",
+        "客家米食拼盤":"集合粢粑、米糕等米食風味，感受客庄的米食文化。",
+        "職人果乾":"由地方職人製作的季節果乾，適合放入野餐套組。",
+        "養生茶包":"以溫和茶香陪伴旅途，適合長輩與全家共享。",
+        "美味麵包":"活動限定的手作麵包，數量有限，送完為止。",
+        "竹田在地甜點":"以地方食材發想的季節甜點，適合親子一起品嘗。"
+    };
+
+    modal(`
+
+        <div class="fade-in">
+
+            <div style="font-size:3rem;">
+                📍
+            </div>
+
+            <h3>${name}</h3>
+
+            <p class="desc" style="
+                margin:12px 0;
+                line-height:1.7;
+            ">
+                ${descriptions[name]}
+            </p>
+
+            <button
+                class="btn green full"
+                onclick="closeModal()">
+
+                ✓ 探索完成
+
+            </button>
+
+        </div>
+
+    `);
+}
+
+
+/* ======================================
+   3. AR 動態明信片
+====================================== */
+
+function openPostcard() {
+
+    modal(`
+
+        <div class="fade-in">
+
+            <h3>💌 竹田 AR 動態明信片</h3>
+
+            <p class="desc">
+                輸入一句你想留給竹田的話，
+                幫你生成一段旅行文案。
+            </p>
+
+            <textarea
+                id="postcardInput"
+                placeholder="例如：今天在竹田車站遇見很慢的午後。"
+                style="
+                    width:100%;
+                    height:90px;
+                    margin-top:12px;
+                    padding:10px;
+                    border:1px solid #cbd5e1;
+                    border-radius:10px;
+                    resize:none;
+                    font-size:.78rem;
+                "
+            ></textarea>
+
+            <button
+                class="btn amber full"
+                style="margin-top:9px;"
+                onclick="generatePostcard()">
+
+                ✨ 生成旅行文案
+
+            </button>
+
+            <div id="postcardResult"></div>
+
+        </div>
+
+    `);
+}
+
+
+function generatePostcard() {
+
+    const input =
+        document.getElementById("postcardInput").value.trim();
+
+    if (!input) {
+
+        toast("先寫一句你的竹田記憶！");
+        return;
+    }
+
+    const texts = [
+
+        "有些旅行不必走得很遠，在竹田的午後，時間也願意慢下來。",
+
+        "火車慢慢進站，而我剛好把這個午後留了下來。",
+
+        "來竹田，不只是經過一座車站，而是遇見一段地方的時間。",
+
+        "把今天的風、陽光與竹田，一起收藏進這張明信片。"
+
+    ];
+
+    const text =
+        texts[Math.floor(Math.random() * texts.length)];
+
+    document.getElementById("postcardResult").innerHTML = `
+
+        <div class="postcard-preview fade-in">
+
+            <div class="postcard-stamp">
+                📮
+            </div>
+
+            <div class="postcard-text">
+
+                <h3>
+                    竹田・頓物驛站
+                </h3>
+
+                <p>
+                    ${text}
+                </p>
+
+            </div>
+
+        </div>
+
+        <button
+            class="btn green full"
+            style="margin-top:10px;"
+            onclick="completeTask8(3); closeModal();">
+
+            💌 收藏這張明信片
+
+        </button>
+
+    `;
+}
+
+
+/* ======================================
+   4. 天使花園
+====================================== */
+
+function openFlowerTest() {
+
+    modal(`
+
+        <div class="fade-in">
+
+            <h3>🌸 天使花園專屬花束測驗</h3>
+
+            <p class="desc">
+                選擇最符合你的旅行方式。
+            </p>
+
+            <div class="options">
+
+                <button class="opt"
+                    onclick="flowerResult('牡羊座','熱情文心蘭')">
+                    A. 說走就走，喜歡冒險
+                </button>
+
+                <button class="opt"
+                    onclick="flowerResult('雙魚座','夢幻蝴蝶蘭')">
+                    B. 喜歡浪漫與慢旅行
+                </button>
+
+                <button class="opt"
+                    onclick="flowerResult('金牛座','溫柔滿天星')">
+                    C. 喜歡美食與舒服的地方
+                </button>
+
+                <button class="opt"
+                    onclick="flowerResult('天秤座','優雅玫瑰花束')">
+                    D. 喜歡拍照與漂亮的風景
+                </button>
+
+            </div>
+
+        </div>
+
+    `);
+}
+
+
+function flowerResult(sign, flower) {
+
+    completeTask8(4);
+
+    modal(`
+
+        <div class="fade-in">
+
+            <h3>
+                🌸 你的竹田花束
+            </h3>
+
+            <div class="bouquet">
+
+                <div class="bouquet-icon">
+                    💐
+                </div>
+
+                <h2 style="color:#9f1239;">
+                    ${flower}
+                </h2>
+
+                <p style="
+                    font-size:.75rem;
+                    margin-top:6px;
+                ">
+                    ${sign} 專屬花束
+                </p>
+
+            </div>
+
+            <div style="
+                background:#fef3c7;
+                border-radius:10px;
+                padding:10px;
+                margin-top:10px;
+                font-size:.72rem;
+            ">
+
+                🎁 已解鎖「專屬花束優惠券」
+
+            </div>
+
+            <button
+                class="btn green full"
+                style="margin-top:10px;"
+                onclick="closeModal()">
+
+                收藏我的花束
+
+            </button>
+
+        </div>
+
+    `);
+}
+
+
+/* ======================================
+   5. 掃描集章
+====================================== */
+
+function openStampScanner() {
+
+    modal(`
+
+        <div class="fade-in">
+
+            <h3>🎟️ 竹田鐵道掃描集章</h3>
+
+            <p class="desc">
+                到指定景點掃描 QR Code，
+                系統會自動幫你蓋章。
+            </p>
+
+            <div class="qr-box"></div>
+
+            <p style="
+                text-align:center;
+                font-size:.72rem;
+                color:#64748b;
+            ">
+                Demo：模擬掃描站點 QR Code
+            </p>
+
+            <button
+                class="btn green full"
+                onclick="fakeScanStamp()">
+
+                📷 掃描 QR Code
+
+            </button>
+
+        </div>
+
+    `);
+}
+
+
+function fakeScanStamp() {
+
+    closeModal();
+
+    toast(
+        "✓ 掃描成功！\n\n" +
+        "🚂 竹田鐵道復古印章 +1"
+    );
+
+    completeTask8(5);
+}
+
+
+/* ======================================
+   6. 客庄聲音
+====================================== */
+
+function openSoundTask() {
+    modal(`<div class="fade-in">
+      <h3>🗣️ 客語 × 閩南語知識任務</h3>
+      <p class="desc" style="line-height:1.7">竹田約有 30% 閩南人，客家與閩南語言在地方生活中彼此交流。按下播放，聽聽兩種語言的地方詞彙。</p>
+      <div class="audio" style="margin:12px 0"><div><b>客語：火車站</b><div style="font-size:.68rem;color:#94a3b8;margin-top:4px">Fó-chha-chhâm</div></div><button class="btn amber" onclick="toast('🔊 客語讀音：Fó-chha-chhâm')">▶ 播放</button></div>
+      <div class="audio" style="margin:12px 0"><div><b>閩南語：火車站</b><div style="font-size:.68rem;color:#94a3b8;margin-top:4px">hué-chia-chām</div></div><button class="btn amber" onclick="toast('🔊 閩南語讀音：hué-chia-chām')">▶ 播放</button></div>
+      <p style="font-size:.72rem;color:#475569;background:#eff6ff;padding:9px;border-radius:9px">知識卡：畢竟竹田也有 30% 的閩南人，認識兩種語言，才能聽見更完整的竹田。</p>
+      <div class="options"><button class="opt" onclick="soundCorrect()">👍 我知道：客語與閩南語都是竹田的生活聲音</button><button class="opt" onclick="toast('再聽一次，想想竹田多元的地方人口與語言。')">再想一想</button></div>
+    </div>`);
+}
+
+function soundCorrect() {
+
+    completeTask8(6);
+
+    toast("✓ 回答正確！客庄聲音任務完成。");
+
+    closeModal();
+}
+
+
+/* ======================================
+   7. 鐵道記憶展示
+====================================== */
+
+function openFilmZone(){modal(`<h3>🎥 決定竹田下一部紀錄片</h3><p class="desc">請選擇一個主題，再挑選想加入的拍攝元素，居民、學生與旅人都能一起當製作人。</p><div class="options"><button class="opt" onclick="filmVote('高齡職人與地方記憶')">1. 👵 高齡職人與地方記憶</button><button class="opt" onclick="filmVote('竹田國中學生的一天')">2. 🎒 竹田國中學生的一天</button><button class="opt" onclick="filmVote('竹田美食與產地故事')">3. 🍜 竹田美食與產地故事</button><button class="opt" onclick="filmVote('台日鐵道文化交流')">4. 🚂 台日鐵道文化交流</button><button class="opt" onclick="filmVote('客語與閩南語的竹田')">5. 🗣️ 客語與閩南語的竹田</button><button class="opt" onclick="filmVote('竹田國中畢業歌的故事')">6. 🎵 畢業歌與青春記憶</button><button class="opt" onclick="filmVote('銀髮組與小孩舞台')">7. 🧓🧒 跨世代舞台</button><button class="opt" onclick="filmVote('竹田露天電影的一夜')">8. 🌙 露天電影的一夜</button><button class="opt" onclick="filmVote('六堆客庄生活地圖')">9. 🏡 六堆客庄生活地圖</button><button class="opt" onclick="filmVote('鐵道與米倉產業史')">10. 🌾 鐵道與米倉產業史</button><button class="opt" onclick="filmVote('竹田慢旅與跑步美食奪點')">11. 🏃 500m 美食路線</button><button class="opt" onclick="filmVote('日本友好交流')">12. 🇯🇵 日本竹田友好交流</button><button class="opt" onclick="filmVote('青齡職人挑戰')">13. 👍 青齡職人挑戰</button></div><div style="margin-top:11px;background:#eff6ff;padding:10px;border-radius:10px;font-size:.72rem">🎬 拍攝元素：人物訪談｜老照片｜空拍地景｜料理特寫｜學生旁白｜台日字幕</div>`)}
+function filmVote(choice){unlock(7);modal(`<h3>🎬 投票完成</h3><p class="desc" style="margin:10px 0">你選擇了「${choice}」。你的意見會納入下一部竹田紀錄片的拍攝提案。</p><button class="btn green full" onclick="closeModal()">完成</button>`)}
+function openDocumentaryWatch(){modal(`<h3>🎞️ 竹田紀錄片觀賞</h3><p class="desc" style="line-height:1.7">選一段竹田地方影像觀看，認識鐵道、米倉、客庄與跨世代生活。</p><div class="card" style="background:#0f172a;color:#fff;text-align:left;margin:10px 0"><div style="font-size:3rem;text-align:center">▶️</div><b>《頓物的時間》預告片</b><p style="font-size:.72rem;color:#cbd5e1;margin-top:6px">竹田車站、紅磚倉庫與地方人物的影像剪輯 Demo。</p><button class="btn amber full" style="margin-top:8px" onclick="toast('▶️ 正在播放竹田紀錄片預告片 Demo。')">播放預告片</button></div><button class="btn green full" onclick="closeModal()">完成觀賞</button>`)}
+function openCoCreateFilm(){modal(`<h3>🎬 決定下一部共創的竹田微電影</h3><p class="desc">選一個你最想看的方向，下一部微電影由大家共同決定。</p><div class="options"><button class="opt" onclick="filmVote('車站月台的重逢')">🚉 車站月台的重逢</button><button class="opt" onclick="filmVote('青齡舞台的一首歌')">🧓🧒 青齡舞台的一首歌</button><button class="opt" onclick="filmVote('500m 美食奪點冒險')">🍨 500m 美食奪點冒險</button><button class="opt" onclick="filmVote('日本友好交換日記')">🇯🇵 日本友好交換日記</button></div><div style="margin-top:11px;background:#fff7ed;padding:10px;border-radius:10px;font-size:.72rem;color:#92400e">🌙 露天電影院活動訊息：新片與放映日期敬請期待。</div>`)}
+
+function openJapanRailwayStory(){modal(`<h3>🇯🇵 日本鐵路電影 × 日本竹田友好故事</h3><p class="desc" style="line-height:1.7">從日本地方鐵路電影，看見車站如何成為地方生活的入口；再回到竹田，認識台日之間透過鐵道、影像與地方交流建立的友好連結。</p><div class="card" style="margin-top:10px;background:#fff7ed;text-align:left"><b>🎞️ 日本鐵路電影</b><p class="desc" style="margin-top:5px">推薦觀看：地方線列車、老站修復、鐵道職人與小站居民的紀錄片段。</p></div><div class="card" style="margin-top:9px;background:#eff6ff;text-align:left"><b>🤝 日本竹田友好</b><p class="desc" style="margin-top:5px">竹田以車站、文庫與地方影像為橋梁，分享台灣客庄生活，也向日本友好夥伴學習保存鐵道文化。</p></div><button class="btn green full" style="margin-top:10px" onclick="document.getElementById('stamp2').classList.remove('locked');closeModal()">收藏日本友好故事</button></div>`)}
+function openGraduationSong(){modal(`<h3>🎵 竹田國中畢業歌</h3><p class="desc" style="line-height:1.7">這首歌記錄少年離開校園、仍把竹田的風、鐵道與同學情誼帶在身上的故事。活動當天將邀請銀髮組與孩子舞台一起合唱。</p><div class="audio" style="margin:12px 0"><div><b>竹田國中畢業歌｜故事版</b><div style="font-size:.68rem;color:#94a3b8;margin-top:4px">按下播放，聽見青春與地方的回聲</div></div><button class="btn amber" onclick="playGraduationSong()">▶ 播放</button></div><button class="btn green full" onclick="closeModal()">完成</button>`)}
+function playGraduationSong(){const C=window.AudioContext||window.webkitAudioContext;if(!C){toast('目前瀏覽器不支援播放 Demo 旋律，請使用支援音訊的瀏覽器。');return;}const ctx=new C();const notes=[261.63,293.66,329.63,392,329.63,293.66,261.63,196];notes.forEach((freq,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type='triangle';o.frequency.value=freq;g.gain.setValueAtTime(.0001,ctx.currentTime+i*.32);g.gain.exponentialRampToValueAtTime(.12,ctx.currentTime+i*.32+.03);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+i*.32+.28);o.connect(g).connect(ctx.destination);o.start(ctx.currentTime+i*.32);o.stop(ctx.currentTime+i*.32+.3);});}
+
+function openOutdoorCinema(){modal(`<h3>🌙 竹田露天電影公告</h3><div class="card" style="background:#0f172a;color:#fff;text-align:left"><b style="color:#f59e0b">本週六｜竹田驛園草地</b><p style="font-size:.75rem;line-height:1.7;margin-top:8px">18:30 開放入場<br>19:00 台日地方短片放映<br>20:30 竹田國中畢業歌共同演唱<br>請自備野餐墊，雨天公告將於活動頁更新。</p></div><button class="btn amber full" style="margin-top:10px" onclick="closeModal()">我知道了</button>`)}
+let qinglingRecorder=null,qinglingChunks=[];
+function openQinglingZone(){modal(`<h3>🧓🧒 青齡專區｜銀髮組與小孩舞台</h3><p class="desc" style="line-height:1.7">活動前可以錄製舞台影片，活動當天直接播放並由現場評分；也可以獨立播放竹田國中畢業歌與故事。</p><div class="card" style="margin-top:10px;background:#fff7ed;text-align:left"><b>🎥 活動影片錄製</b><video id="qinglingVideo" style="width:100%;margin-top:8px;border-radius:10px;background:#111;max-height:180px" playsinline></video><div style="display:flex;gap:7px;margin-top:8px"><button class="btn red" style="flex:1" onclick="startQinglingRecording()">● 開始錄影</button><button class="btn amber" style="flex:1" onclick="stopQinglingRecording()">■ 停止並保存</button></div><button class="btn green full" id="playQinglingBtn" style="margin-top:7px" disabled onclick="playQinglingVideo()">▶ 活動日播放影片</button><div id="qinglingScore" style="margin-top:8px;font-size:.74rem;color:#166534">尚未評分</div><div style="display:flex;gap:6px;margin-top:7px"><button class="btn" style="flex:1" onclick="scoreQingling(5)">評 5 分</button><button class="btn" style="flex:1" onclick="scoreQingling(4)">評 4 分</button><button class="btn" style="flex:1" onclick="scoreQingling(3)">評 3 分</button></div></div><div class="card" style="margin-top:10px;background:#eff6ff;text-align:left"><b>🎵 竹田國中畢業歌</b><p class="desc" style="margin-top:5px">獨立收聽畢業歌，了解歌曲如何保存竹田孩子的青春故事。</p><button class="btn amber full" style="margin-top:8px" onclick="openGraduationSong()">▶ 聽歌與閱讀故事</button></div><button class="btn green full" style="margin-top:10px" onclick="toast('🎶 已加入青齡舞台活動提醒！');closeModal()">加入活動提醒</button>`)}
+async function startQinglingRecording(){try{const stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});qinglingChunks=[];qinglingRecorder=new MediaRecorder(stream);qinglingRecorder.ondataavailable=e=>{if(e.data.size)qinglingChunks.push(e.data)};qinglingRecorder.onstop=()=>{const video=document.getElementById('qinglingVideo');if(video){video.src=URL.createObjectURL(new Blob(qinglingChunks,{type:'video/webm'}));video.controls=true;document.getElementById('playQinglingBtn').disabled=false;}stream.getTracks().forEach(t=>t.stop());};qinglingRecorder.start();toast('● 已開始錄製青齡舞台影片。');}catch(e){toast('無法啟動相機或麥克風，請確認瀏覽器權限；也可以直接使用活動日播放功能。');}}
+function stopQinglingRecording(){if(qinglingRecorder&&qinglingRecorder.state==='recording'){qinglingRecorder.stop();toast('✓ 影片已保存，可在活動日播放。');}else toast('請先按「開始錄影」。');}
+function playQinglingVideo(){const v=document.getElementById('qinglingVideo');if(v){v.play();}}
+function scoreQingling(score){const el=document.getElementById('qinglingScore');if(el)el.textContent=`活動日評分：${score} 分｜已記錄本次舞台表現`;unlock(9)}
+
+function openCraftChallenge(){const groups=["機械群","動力機械群","電機與電子群","化工群","土木與建築群","設計群","工程與管理群","商業與管理群","外語群","幼兒保育群","家政群","農業群","食品群","餐旅群","水產群","海事群","藝術群","電機工程群","資訊群"];modal(`<h3>👍 高職 19 大職群｜職人成功分享</h3><p class="desc" style="line-height:1.7"><b>不限年齡皆可參加</b><br>點選職群，看看竹田職人如何把學習變成工作與生活的成功故事。</p><div class="options">${groups.map((g,i)=>`<button class="opt" onclick="craftStory('${g}')">${i+1}. ${g}｜查看職人分享</button>`).join("")}</div>`)}
+
+function craftStory(group){const stories={"機械群":"從修理機械開始，職人把精準與耐心變成一生的技藝。","動力機械群":"把引擎與交通工具照顧好，讓地方的移動不曾停下。","電機與電子群":"用電路、設備與創意解決生活問題，從學校作品走向職場。","化工群":"學會安全、配方與品質管理，把科學帶進地方產業。","土木與建築群":"參與房屋與公共空間建設，讓竹田的生活環境更舒適。","設計群":"把地方故事變成視覺、產品與品牌，讓竹田被更多人看見。","工程與管理群":"用流程與管理把團隊力量串起來，完成一件件地方任務。","商業與管理群":"從一間小店開始學會服務、帳務與經營，守住地方人情味。","外語群":"用語言連結世界，也把竹田故事介紹給國際旅人。","幼兒保育群":"用陪伴與教育守護孩子成長，讓跨世代舞台更有溫度。","家政群":"將照護、生活美學與手作能力變成專業服務。","農業群":"從土地與季節學習，培育安全、友善又有故事的農產。","食品群":"把食材變成美味產品，守住衛生、品質與家鄉風味。","餐旅群":"用接待、料理與服務，讓每位旅人感受到竹田的熱情。","水產群":"理解水域與養殖技術，守護食物來源與生態。","海事群":"從航運、船舶與安全知識，培養面向世界的專業。","藝術群":"以表演、音樂與創作說地方故事，讓舞台成為大家的家。","電機工程群":"把能源與設備技術應用於社區，讓日常更安全便利。","資訊群":"用數位工具記錄地方、設計服務，讓傳統文化有新的入口。"};modal(`<h3>職人成功分享｜${group}</h3><p class="desc" style="line-height:1.7">${stories[group]}</p><div class="card" style="background:#f0fdf4;margin:10px 0;text-align:left"><b>成功關鍵</b><p class="desc" style="margin-top:5px">持續學習、願意和不同世代合作，並把專業回到地方使用。</p></div><button class="btn green full" onclick="craftCompleted('${group}')">✓ 完成職人挑戰</button>`)}
+
+function craftCompleted(group){modal(`<h3>✓ 職人挑戰完成</h3><p class="desc" style="line-height:1.7">你已完成「${group}」職群的職人分享任務。</p><div style="font-size:4rem;margin:12px">👍🧓</div><p style="font-size:.75rem;color:#166534">本項任務已記錄完成。</p><button class="btn green full" onclick="completeTask8(8);closeModal()">完成並返回</button>`)}
+
+function openRailwayMemory() {
+
+    modal(`
+
+        <div class="fade-in">
+
+            <h3>🚂 竹田鐵道記憶展示</h3>
+
+            <p class="desc">
+                掃描展示物，解鎖竹田車站的歷史記憶。
+            </p>
+
+            <div style="
+                display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:9px;
+                margin-top:12px;
+            ">
+
+                <div style="
+                    padding:18px 8px;
+                    background:#fff7ed;
+                    border-radius:12px;
+                    text-align:center;
+                ">
+                    🎟️
+                    <br>
+                    <b style="font-size:.7rem;">
+                        復古車票
+                    </b>
+                </div>
+
+                <div style="
+                    padding:18px 8px;
+                    background:#f0fdf4;
+                    border-radius:12px;
+                    text-align:center;
+                ">
+                    📸
+                    <br>
+                    <b style="font-size:.7rem;">
+                        老車站照片
+                    </b>
+                </div>
+
+                <div style="
+                    padding:18px 8px;
+                    background:#eff6ff;
+                    border-radius:12px;
+                    text-align:center;
+                ">
+                    🚂
+                    <br>
+                    <b style="font-size:.7rem;">
+                        鐵道故事
+                    </b>
+                </div>
+
+                <div style="
+                    padding:18px 8px;
+                    background:#fef3c7;
+                    border-radius:12px;
+                    text-align:center;
+                ">
+                    🌾
+                    <br>
+                    <b style="font-size:.7rem;">
+                        頓物記憶
+                    </b>
+                </div>
+
+            </div>
+
+            <button
+                class="btn green full"
+                style="margin-top:12px;"
+                onclick="completeTask8(7); closeModal();">
+
+                📖 完成記憶探索
+
+            </button>
+
+        </div>
+
+    `);
+}
+
+
+/* ======================================
+   8. 竹田時光郵件
+====================================== */
+
+function openTimeMail() {
+
+    modal(`
+
+        <div class="fade-in">
+
+            <h3>📮 竹田時光郵件</h3>
+
+            <p class="desc">
+                把今天的竹田，寄給未來的自己。
+            </p>
+
+            <textarea
+                id="timeMailText"
+                placeholder="寫一句想留給未來自己的話..."
+                style="
+                    width:100%;
+                    height:110px;
+                    margin-top:12px;
+                    padding:11px;
+                    border:1px solid #cbd5e1;
+                    border-radius:10px;
+                    resize:none;
+                    font-size:.78rem;
+                "
+            ></textarea>
+
+            <div style="
+                margin-top:10px;
+                font-size:.75rem;
+                color:#64748b;
+            ">
+                📅 選擇寄送時間
+            </div>
+
+            <select
+                id="mailTime"
+                style="
+                    width:100%;
+                    padding:10px;
+                    margin-top:6px;
+                    border:1px solid #cbd5e1;
+                    border-radius:9px;
+                "
+            >
+
+                <option>1 個月後</option>
+                <option>3 個月後</option>
+                <option>6 個月後</option>
+                <option>1 年後</option>
+
+            </select>
+
+            <button
+                class="btn amber full"
+                style="margin-top:10px;"
+                onclick="sendTimeMail()">
+
+                📮 寄給未來的自己
+
+            </button>
+
+        </div>
+
+    `);
+}
+
+
+function sendTimeMail() {
+
+    const text =
+        document.getElementById("timeMailText")
+        .value.trim();
+
+    const time =
+        document.getElementById("mailTime").value;
+
+    if (!text) {
+
+        toast("請先寫下想留給未來自己的話！");
+        return;
+    }
+
+    completeTask8(8);
+
+    modal(`
+
+        <div class="fade-in">
+
+            <div class="time-mail">
+
+                <div class="time-mail-header">
+
+                    <b>
+                        📮 竹田時光郵件
+                    </b>
+
+                    <span style="
+                        font-size:.65rem;
+                        color:#92400e;
+                    ">
+                        ${time}
+                    </span>
+
+                </div>
+
+                <div class="time-mail-body">
+
+                    「${escapeHTML(text)}」
+
+                </div>
+
+                <div style="
+                    text-align:right;
+                    font-size:.65rem;
+                    color:#92400e;
+                ">
+
+                    來自 2026 的竹田車站
+
+                </div>
+
+            </div>
+
+            <p class="desc" style="
+                margin-top:12px;
+                text-align:center;
+            ">
+
+                ✓ 已建立你的專屬竹田時光郵件
+
+            </p>
+
+            <button
+                class="btn green full"
+                style="margin-top:8px;"
+                onclick="closeModal()">
+
+                完成
+
+            </button>
+
+        </div>
+
+    `);
+}
+
+
+/* ======================================
+   任務完成
+====================================== */
+
+function completeTask8(task) {
+
+    if (!task8Completed.includes(task)) {
+
+        task8Completed.push(task);
+
+    }
+
+    console.log(
+        "竹田 8 大任務完成：",
+        task8Completed.length,
+        "/ 8"
+    );
+
+    const counter = document.getElementById("task8Counter");
+    if (counter) counter.textContent = `${task8Completed.length} / 8`;
+
+    const card = document.getElementById("task8-card-" + task);
+    if (card) card.classList.add("done");
+
+    const arrow = document.getElementById("task8-arrow-" + task);
+    if (arrow) arrow.textContent = "✓ 已完成";
+
+    if (task8Completed.length >= 8) {
+        toast("🎉 恭喜！8 大探索任務已全部完成，可至集章錢包查看成果。");
+    }
+
+    /*
+     * 如果原本 HTML 有 progress 系統，
+     * 可以同步到原本的 progress。
+     */
+
+    if (typeof unlock === "function") {
+
+        const current =
+            Math.min(
+                10,
+                Math.max(
+                    1,
+                    Math.ceil(
+                        task8Completed.length * 10 / 8
+                    )
+                )
+            );
+
+        unlock(current);
+    }
+}
+
+
+/* ======================================
+   HTML 安全處理
+====================================== */
+
+function escapeHTML(str) {
+
+    return str
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+</script>
+</body>
+</html>
