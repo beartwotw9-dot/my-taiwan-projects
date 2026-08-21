@@ -697,7 +697,22 @@ function mapMode(mode){let t=document.getElementById("travelBtn"),f=document.get
 function run(){runKm+=.8;document.getElementById("runKm").textContent=runKm.toFixed(1)+" km";toast(`已記錄竹田探索路線 ${runKm.toFixed(1)} km！`)}
 function scanQR(){if(runKm>=.8){unlock(5);document.getElementById("stamp2").classList.remove("locked");toast("成功掃描 Checkpoint QR！獲得豆油伯醬油兌換券。")}else toast("請先累積至少 0.8 km 再掃描 Checkpoint。")}
 function starChart(){modal(`<h3>☕ 竹田手沖咖啡 × 星盤觀星</h3><div style="background:#0f172a;color:#f59e0b;padding:15px;border-radius:12px;margin:12px 0;text-align:left"><b>✨ 竹田今夜星空指標</b><p style="font-size:.75rem;color:#cbd5e1;margin-top:6px">推薦搭配：頓物深焙手沖<br>體驗：開啟夜間 AR 觀星羅盤</p></div><button class="btn dark full" onclick="closeModal()">開啟 AR 觀星羅盤</button>`);unlock(6)}
-function audio(n){toast(`🔊 正在播放景點 ${n} 語音導覽...`)}
+function audio(n){
+    const scripts = {
+        1: "歡迎來到木造舊站售票口。這座站房建於日治時期，為台灣少數保存完好的木造老車站。請細細觀賞木造拉門與售票窗口的歷史痕跡。",
+        2: "歡迎來到頓物紅磚倉庫。過去這裡是儲存米糧與樟腦物資的樞紐，紅磚牆面上記錄了竹田繁榮的客家庄歲月。",
+        3: "歡迎來到德興碾米廠與古井洗衫坑。聽水流聲與米香，體會當年婦女聚集洗濯與米糧加工的生活文化。"
+    };
+    const text = scripts[n] || `正在播放景點 ${n} 語音導覽...`;
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'zh-TW';
+        u.rate = 1.0;
+        window.speechSynthesis.speak(u);
+    }
+    toast(`🔊 正在播放景點 ${n} 語音導覽...`);
+}
 function vr(){modal(`<h3>🎭 池上一郎 VR 劇本預約</h3><p class="desc" style="margin:8px 0">選擇體驗時段（Demo）</p><div style="text-align:left;font-size:.8rem;display:grid;gap:8px"><label><input type="radio" checked name="vr"> 14:00－14:30【昭和文庫謎案】</label><label><input type="radio" name="vr"> 15:30－16:00【竹田驛情緣】</label></div><button class="btn green full" style="margin-top:12px" onclick="confirmVR()">確認預約</button>`)}
 function confirmVR(){closeModal();unlock(8);toast("VR 體驗預約成功！票券已加入數位錢包。")}
 function channel(){channelIndex=(channelIndex+1)%channels.length;document.getElementById("channel").textContent=channels[channelIndex];unlock(9)}
@@ -727,6 +742,64 @@ async function initCamera(){
     }
 }
 initCamera();
+
+/* 勝利音效與 Confetti 慶祝特效 */
+function playVictoryChime() {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.12, ctx.currentTime + idx * 0.09);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.09 + 0.35);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(ctx.currentTime + idx * 0.09);
+            osc.stop(ctx.currentTime + idx * 0.09 + 0.35);
+        });
+    } catch(e){}
+}
+
+function triggerConfetti() {
+    const canvas = document.createElement('canvas');
+    canvas.style.position = 'fixed';
+    canvas.style.inset = '0';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.zIndex = '9999';
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    const particles = Array.from({length: 40}, () => ({
+        x: canvas.width / 2,
+        y: canvas.height / 2,
+        vx: (Math.random() - 0.5) * 12,
+        vy: (Math.random() - 0.7) * 14,
+        color: ['#f59e0b', '#22c55e', '#3b82f6', '#ec4899', '#8b5a2b'][Math.floor(Math.random() * 5)],
+        size: Math.random() * 6 + 4,
+        alpha: 1
+    }));
+    let frame = 0;
+    function animate() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        particles.forEach(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.4;
+            p.alpha -= 0.015;
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = Math.max(0, p.alpha);
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+        });
+        frame++;
+        if (frame < 60) requestAnimationFrame(animate);
+        else canvas.remove();
+    }
+    animate();
+}
 
 /* ======================================
    竹田車站｜8 大互動任務 JS
@@ -1648,16 +1721,14 @@ function sendTimeMail() {
 function completeTask8(task) {
 
     if (!task8Completed.includes(task)) {
-
         task8Completed.push(task);
-
+        playVictoryChime();
+        triggerConfetti();
     }
 
-    console.log(
-        "竹田 8 大任務完成：",
-        task8Completed.length,
-        "/ 8"
-    );
+    try {
+        localStorage.setItem("zhutian_task8", JSON.stringify(task8Completed));
+    } catch(e){}
 
     const counter = document.getElementById("task8Counter");
     if (counter) counter.textContent = `${task8Completed.length} / 8`;
@@ -1672,35 +1743,31 @@ function completeTask8(task) {
         toast("🎉 恭喜！8 大探索任務已全部完成，可至集章錢包查看成果。");
     }
 
-    /*
-     * 如果原本 HTML 有 progress 系統，
-     * 可以同步到原本的 progress。
-     */
-
     if (typeof unlock === "function") {
-
-        const current =
-            Math.min(
-                10,
-                Math.max(
-                    1,
-                    Math.ceil(
-                        task8Completed.length * 10 / 8
-                    )
-                )
-            );
-
+        const current = Math.min(10, Math.max(1, Math.ceil(task8Completed.length * 10 / 8)));
         unlock(current);
     }
 }
 
-
-/* ======================================
-   HTML 安全處理
-====================================== */
+// 頁面載入時還原完成進度
+document.addEventListener("DOMContentLoaded", function() {
+    try {
+        const saved = localStorage.getItem("zhutian_task8");
+        if (saved) {
+            task8Completed = JSON.parse(saved);
+            task8Completed.forEach(t => {
+                const card = document.getElementById("task8-card-" + t);
+                if (card) card.classList.add("done");
+                const arrow = document.getElementById("task8-arrow-" + t);
+                if (arrow) arrow.textContent = "✓ 已完成";
+            });
+            const counter = document.getElementById("task8Counter");
+            if (counter) counter.textContent = `${task8Completed.length} / 8`;
+        }
+    } catch(e){}
+});
 
 function escapeHTML(str) {
-
     return str
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
